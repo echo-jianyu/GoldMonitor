@@ -1,0 +1,50 @@
+name: Build and Release
+
+# 触发条件：只要推送形如 v1.0.0、v1.0.1 的标签（Tag）就会自动执行
+on:
+  push:
+    tags:
+      - 'v*'
+
+# 赋予自动向 Releases 页面上传文件的权限
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Single-File EXE
+    # .NET Framework 4.8 必须在 Windows 云端服务器上编译
+    runs-on: windows-latest
+
+    steps:
+      # 1. 拉取仓库源码
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. 安装 .NET SDK 环境
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # 3. 还原 NuGet 依赖包
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      # 4. 编译 Release 单文件 EXE，并自动将 Tag 中的版本号注入程序中
+      - name: Build Single-File EXE with Version
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "Building version: $VERSION"
+          dotnet build -c Release --no-restore -p:Version=$VERSION -p:FileVersion=$VERSION -p:AssemblyVersion=$VERSION
+
+      # 5. 创建 GitHub Release 并自动挂载单文件 EXE 附件
+      - name: Upload EXE to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            **/bin/Release/net48/*.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
