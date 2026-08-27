@@ -1,0 +1,35 @@
+﻿<Window x:Class="GoldMonitor.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:GoldMonitor.Controls"
+        Title="悬浮金价"
+        SizeToContent="WidthAndHeight"
+        MinHeight="26"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        MouseEnter="Window_MouseEnter"
+        MouseLeave="Window_MouseLeave">
+
+    <!-- 胶囊外壳容器 -->
+    <Grid Margin="4">
+        <!-- 右键菜单 -->
+        <Grid.ContextMenu>
+            <ContextMenu Background="#F2F2F2" Foreground="#2C2C2E" BorderBrush="#EAEAEC">
+                <MenuItem Header="设置" Click="MenuSettings_Click" FontWeight="Bold"/>
+                <MenuItem Header="立即刷新" Command="{Binding RefreshDataCommand}"/>
+                <Separator Background="#EAEAEC"/>
+                <MenuItem Header="退出程序" Click="MenuExit_Click"/>
+            </ContextMenu>
+        </Grid.ContextMenu>
+
+        <controls:CapsuleControl x:Name="MainCapsule"
+                                 Cursor="Hand"
+                                 PriceInfo="{Binding PriceData}"
+                                 Settings="{Binding Settings}"/>
+    </Grid>
+</Window>

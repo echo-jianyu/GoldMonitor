@@ -1,0 +1,451 @@
+﻿<Window x:Class="GoldMonitor.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:GoldMonitor.Controls"
+        xmlns:vm="clr-namespace:GoldMonitor.ViewModels"
+        d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="悬浮金价-设置"
+        Icon="/Assets/App.ico"
+        Height="705" Width="640"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#F5F5F7"
+        Foreground="#1D1D1F">
+
+    <Window.Resources>
+        <Style TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="BorderBrush" Value="#E0E0E5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,4"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="4,0"/>
+            <Setter Property="BorderBrush" Value="#D1D1D6"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <!-- 1. 顶部置顶实时预览区 -->
+            <RowDefinition Height="Auto"/>
+            <!-- 2. 中间分页设置区 -->
+            <RowDefinition Height="*"/>
+            <!-- 3. 底部确定与取消操作栏 -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 1. 示例胶囊实时预览卡片 -->
+        <Border Grid.Row="0" Background="#5D5D5D" CornerRadius="12" Padding="20" Margin="0,0,0,16">
+            <StackPanel HorizontalAlignment="Center">
+                <TextBlock Text="样式预览" Foreground="#8E8E93" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                <controls:CapsuleControl PriceInfo="{Binding PreviewPrice}"
+                                         Settings="{Binding Settings}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 2. 中间 Tab 分类配置 -->
+        <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
+
+            <!-- TAB 1: 常规与外观 -->
+            <TabItem Header="常规与外观" FontSize="13" Padding="10,4,10,4">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4,8">
+                    <StackPanel>
+                        <GroupBox Header="开机与运行">
+                            <StackPanel>
+                                <CheckBox Content="开机时自动启动" IsChecked="{Binding Settings.AutoStart}"/>
+                                <CheckBox Content="检测到全屏应用/游戏/视频时自动隐藏 (免打扰)" IsChecked="{Binding Settings.AutoHideOnFullScreen}" Margin="0,6,0,0"/>
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="45"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="数据刷新间隔 (秒):" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <Slider Grid.Column="1" Minimum="1" Maximum="300" SmallChange="1" LargeChange="5"
+                                            Value="{Binding Settings.RefreshIntervalSeconds}" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="2" Text="{Binding Settings.RefreshIntervalSeconds, UpdateSourceTrigger=PropertyChanged}" 
+                                             Margin="6,0,0,0" TextAlignment="Center"/>
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="透明度">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="平时静默透明度:" VerticalAlignment="Center"/>
+                                <Slider Grid.Row="0" Grid.Column="1" Minimum="0.05" Maximum="1.0" SmallChange="0.05"
+                                        Value="{Binding Settings.IdleOpacity}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Settings.IdleOpacity, StringFormat={}{0:P0}}" 
+                                           VerticalAlignment="Center" HorizontalAlignment="Right"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="鼠标移入透明度:" VerticalAlignment="Center" Margin="0,10,0,0"/>
+                                <Slider Grid.Row="1" Grid.Column="1" Minimum="0.10" Maximum="1.0" SmallChange="0.05"
+                                        Value="{Binding Settings.HoverOpacity}" VerticalAlignment="Center" Margin="0,10,0,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Settings.HoverOpacity, StringFormat={}{0:P0}}" 
+                                           VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,0,0"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Header="界面UI缩放">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="60"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="缩放比例:" VerticalAlignment="Center"/>
+                                    <Slider Grid.Column="1" 
+                                        Minimum="0.5" Maximum="3.0" 
+                                        SmallChange="0.05" LargeChange="0.1" 
+                                        TickFrequency="0.05" IsSnapToTickEnabled="True"
+                                        Value="{Binding Settings.UiScale}" 
+                                        VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" 
+                                           Text="{Binding Settings.UiScale, StringFormat={}{0:P0}}" 
+                                           VerticalAlignment="Center" 
+                                           HorizontalAlignment="Right" 
+                                           FontWeight="SemiBold"/>
+                                </Grid>
+
+                                <!-- 快捷比例预设按钮 -->
+                                <WrapPanel Margin="0,10,0,0">
+                                    <TextBlock Text="快捷预设: " Foreground="#8E8E93" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Button Content="80% 迷你" Command="{Binding SetScaleCommand}" CommandParameter="0.8" Padding="8,2" Margin="0,0,6,0"/>
+                                    <Button Content="100% 标准" Command="{Binding SetScaleCommand}" CommandParameter="1.0" Padding="8,2" Margin="0,0,6,0"/>
+                                    <Button Content="125% 清晰" Command="{Binding SetScaleCommand}" CommandParameter="1.25" Padding="8,2" Margin="0,0,6,0"/>
+                                    <Button Content="150% 大号" Command="{Binding SetScaleCommand}" CommandParameter="1.5" Padding="8,2" Margin="0,0,6,0"/>
+                                    <Button Content="180% 巨型" Command="{Binding SetScaleCommand}" CommandParameter="1.8" Padding="8,2"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="字体与色彩">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="全局字体:" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding SystemFonts}" 
+                                          SelectedItem="{Binding Settings.FontFamily}" Height="28"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="背景色:" VerticalAlignment="Center" Margin="0,8,0,0"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.CapsuleBackground, UpdateSourceTrigger=PropertyChanged}" 
+                                         Margin="0,8,0,0"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="边框色:" VerticalAlignment="Center" Margin="0,8,0,0"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.CapsuleBorderColor, UpdateSourceTrigger=PropertyChanged}" 
+                                         Margin="0,8,0,0"/>
+                            </Grid>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- TAB 2: 国际金价 (XAU) -->
+            <TabItem Header="国际金价 (XAU)" FontSize="13" Padding="10,4,10,4">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4,8">
+                    <StackPanel>
+                        <GroupBox Header="模块启用">
+                            <CheckBox Content="显示国际金价 (XAU) 模块" IsChecked="{Binding Settings.ShowXau}" FontWeight="Bold"/>
+                        </GroupBox>
+
+                        <GroupBox Header="标签配置" IsEnabled="{Binding Settings.ShowXau}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Row="0" Grid.ColumnSpan="2" Content="显示标签" IsChecked="{Binding Settings.ShowXauLabel}"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="标签内容/颜色:" VerticalAlignment="Center" Margin="0,6,0,0"/>
+                                <Grid Grid.Row="1" Grid.Column="1" Margin="0,6,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding Settings.XauLabelText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0"/>
+                                    <TextBox Grid.Column="1" Text="{Binding Settings.XauLabelColor, UpdateSourceTrigger=PropertyChanged}"/>
+                                </Grid>
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Header="价格数值配置" IsEnabled="{Binding Settings.ShowXau}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Row="0" Grid.ColumnSpan="2" Content="显示现价数值" IsChecked="{Binding Settings.ShowXauPrice}"/>
+
+                                <!-- 改为下拉框选择小数位数 -->
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="小数位数:" VerticalAlignment="Center" Margin="0,6,0,0"/>
+                                <ComboBox Grid.Row="1" Grid.Column="1" SelectedIndex="{Binding Settings.XauPriceDecimals}" Height="26" Margin="0,6,0,0">
+                                    <ComboBoxItem Content="0 位（取整模式，如 4634）"/>
+                                    <ComboBoxItem Content="1 位（紧凑模式，如 4633.8）"/>
+                                    <ComboBoxItem Content="2 位（★ 标准行情，如 4633.84）"/>
+                                </ComboBox>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="文字颜色:" VerticalAlignment="Center" Margin="0,6,0,0"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.XauPriceColor, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,0"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Header="涨跌幅配置" IsEnabled="{Binding Settings.ShowXau}">
+                            <StackPanel>
+                                <CheckBox Content="显示涨跌幅" IsChecked="{Binding Settings.ShowXauChangeRate}"/>
+                                <WrapPanel Margin="0,6,0,0">
+                                    <CheckBox Content="显示加减正负号 (+ / -)" IsChecked="{Binding Settings.ShowXauSign}" Margin="0,0,16,0"/>
+                                    <CheckBox Content="显示百分号 (%)" IsChecked="{Binding Settings.ShowXauPercent}"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- TAB 3: 国内金价 (AU) -->
+            <TabItem Header="国内金价 (AU9999)" FontSize="13" Padding="10,4,10,4">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4,8">
+                    <StackPanel>
+                        <GroupBox Header="模块启用">
+                            <CheckBox Content="显示国内金价 (AU9999) 模块" IsChecked="{Binding Settings.ShowDom}" FontWeight="Bold"/>
+                        </GroupBox>
+
+                        <GroupBox Header="标签配置" IsEnabled="{Binding Settings.ShowDom}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Row="0" Grid.ColumnSpan="2" Content="显示标签" IsChecked="{Binding Settings.ShowDomLabel}"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="标签内容/颜色:" VerticalAlignment="Center" Margin="0,6,0,0"/>
+                                <Grid Grid.Row="1" Grid.Column="1" Margin="0,6,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding Settings.DomLabelText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0"/>
+                                    <TextBox Grid.Column="1" Text="{Binding Settings.DomLabelColor, UpdateSourceTrigger=PropertyChanged}"/>
+                                </Grid>
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Header="价格数值配置" IsEnabled="{Binding Settings.ShowDom}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Row="0" Grid.ColumnSpan="2" Content="显示现价数值" IsChecked="{Binding Settings.ShowDomPrice}"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="小数位数 (0-2):" VerticalAlignment="Center" Margin="0,6,0,0"/>
+                                <ComboBox Grid.Row="1" Grid.Column="1" SelectedIndex="{Binding Settings.DomPriceDecimals}" Height="26" Margin="0,6,0,0">
+                                    <ComboBoxItem Content="0 位（取整模式，如 1000）"/>
+                                    <ComboBoxItem Content="1 位（紧凑模式，如 1000.4）"/>
+                                    <ComboBoxItem Content="2 位（★ 标准行情，如 1000.40）"/>
+                                </ComboBox>
+                                
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="文字颜色:" VerticalAlignment="Center" Margin="0,6,0,0"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.DomPriceColor, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,0"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Header="涨跌幅配置" IsEnabled="{Binding Settings.ShowDom}">
+                            <StackPanel>
+                                <CheckBox Content="显示涨跌幅" IsChecked="{Binding Settings.ShowDomChangeRate}"/>
+                                <WrapPanel Margin="0,6,0,0">
+                                    <CheckBox Content="显示加减正负号 (+ / -)" IsChecked="{Binding Settings.ShowDomSign}" Margin="0,0,16,0"/>
+                                    <CheckBox Content="显示百分号 (%)" IsChecked="{Binding Settings.ShowDomPercent}"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- TAB 4: 涨跌配色 -->
+            <TabItem Header="涨跌配色" FontSize="13" Padding="10,4,10,4">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4,8">
+                    <StackPanel>
+                        <GroupBox Header="一键快速配色方案">
+                            <WrapPanel>
+                                <Button Content="柔金 / 翡翠" Command="{Binding ApplyColorPresetCommand}" CommandParameter="GoldGreen" 
+                                        Padding="10,4" Margin="0,0,8,0"/>
+                                <Button Content="国内红涨 / 绿跌" Command="{Binding ApplyColorPresetCommand}" CommandParameter="RedGreen" 
+                                        Padding="10,4" Margin="0,0,8,0"/>
+                                <Button Content="国际绿涨 / 红跌" Command="{Binding ApplyColorPresetCommand}" CommandParameter="GreenRed" 
+                                        Padding="10,4"/>
+                            </WrapPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="自定义色彩 (HEX)">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="上涨颜色:" VerticalAlignment="Center"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.UpColor, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="下跌颜色:" VerticalAlignment="Center" Margin="0,10,0,0"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.DownColor, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,0,0"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="平盘颜色:" VerticalAlignment="Center" Margin="0,10,0,0"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.FlatColor, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,0,0"/>
+                            </Grid>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ================= TAB 5: 关于软件 ================= -->
+            <TabItem Header="关于" FontSize="13" Padding="10,4,10,4">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4,8">
+                    <StackPanel>
+                        <!-- 1. 软件头部卡片 -->
+                        <Border Background="White" CornerRadius="8" Padding="20,16" Margin="0,0,0,12" BorderBrush="#E0E0E5" BorderThickness="1">
+                            <StackPanel HorizontalAlignment="Center">
+                                <!-- 图标 -->
+                                <Image Source="/Assets/App.ico" Width="48" Height="48" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+                                <!-- 软件名与版本 Badge -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="悬浮金价" FontSize="18" FontWeight="Bold" Foreground="#1D1D1F"/>
+                                    <Border Background="#E5E5EA" CornerRadius="4" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding AppVersion}" FontSize="11" FontWeight="SemiBold" Foreground="#636366"/>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- 一句话简介 -->
+                                <TextBlock Text="极简、优雅、低占用的 Windows 桌面实时金价悬浮胶囊" 
+                                           Foreground="#8E8E93" FontSize="12" Margin="0,6,0,0" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 2. 开源与项目信息 -->
+                        <GroupBox Header="开源与主页">
+                            <StackPanel Margin="4">
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="开源协议:" Foreground="#8E8E93" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="MIT License" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <Grid Margin="0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="GitHub 主页:" Foreground="#8E8E93" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" VerticalAlignment="Center">
+                                        <!-- 点击自动用系统默认浏览器打开 -->
+                                        <Hyperlink NavigateUri="https://github.com/echo-jianyu/GoldMonitor" RequestNavigate="Hyperlink_RequestNavigate">
+                                            GitHub 仓库主页 (欢迎 Star ⭐)
+                                        </Hyperlink>
+                                    </TextBlock>
+                                </Grid>
+
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="问题反馈:" Foreground="#8E8E93" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" VerticalAlignment="Center">
+                                        <Hyperlink NavigateUri="https://github.com/echo-jianyu/GoldMonitor/issues" RequestNavigate="Hyperlink_RequestNavigate">
+                                            提交 Bug 或建议 (Issues)
+                                        </Hyperlink>
+                                    </TextBlock>
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- 3. 技术栈与免责声明 -->
+                        <GroupBox Header="技术说明与声明">
+                            <StackPanel Margin="4">
+                                <TextBlock Text="• 目标运行时：  .NET Framework 4.8" Foreground="#3A3A3C" Margin="0,3"/>
+                                <TextBlock Text="• 界面框架：     WPF + CommunityToolkit.Mvvm" Foreground="#3A3A3C" Margin="0,3"/>
+                                <TextBlock Text="• 行情数据源：  新浪财经（伦敦金 XAU / 上金所 Au9999）" Foreground="#3A3A3C" Margin="0,3"/>
+                                <Separator Background="#EAEAEA" Margin="0,8,0,8"/>
+                                <TextBlock Text="免责声明: 本软件行情数据仅供个人参考展示，不构成任何投资或交易建议。" 
+                                           Foreground="#8E8E93" FontSize="11" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <!-- 3. 底部控制栏 -->
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Button Content="恢复默认" Command="{Binding ResetToDefaultsCommand}" 
+                    HorizontalAlignment="Left" Padding="14,6" Background="#E5E5EA" BorderBrush="#D1D1D6"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="确定" Command="{Binding SaveCommand}" 
+                        IsDefault="True" Padding="20,6" Background="#007AFF" Foreground="White" BorderThickness="0" Margin="0,0,8,0"/>
+                <Button Content="取消" Command="{Binding CancelCommand}" 
+                        IsCancel="True" Padding="16,6" Background="#E5E5EA" BorderBrush="#D1D1D6"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
