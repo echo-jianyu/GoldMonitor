@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using GoldMonitor.Models;
 
 namespace GoldMonitor.Controls;
@@ -61,13 +62,42 @@ public partial class CapsuleControl : UserControl
         if (d is CapsuleControl control)
         {
             control.UpdateVisuals();
+
+            // 数据变化时触发脉冲动画 + 更新时间 Tooltip
+            if (e.Property == PriceInfoProperty && e.NewValue is GoldPriceInfo info && info.UpdateTime > DateTime.MinValue)
+            {
+                control.PlayRefreshPulse();
+                control.OuterBorder.ToolTip = $"最后更新：{info.UpdateTime:HH:mm:ss}";
+            }
+        }
+    }
+
+    /// <summary>
+    /// 数据刷新脉冲：短暂提亮边框后恢复，给用户"数据已更新"的视觉反馈
+    /// </summary>
+    private void PlayRefreshPulse()
+    {
+        if (OuterBorder.BorderBrush is SolidColorBrush brush)
+        {
+            // UpdateVisuals 会对画刷 Freeze，冻结对象不可动画；克隆一个可写的副本再播放脉冲
+            brush = brush.CloneCurrentValue();
+            OuterBorder.BorderBrush = brush;
+            var pulse = new ColorAnimation
+            {
+                From = Colors.White,
+                To = brush.Color,
+                Duration = TimeSpan.FromMilliseconds(400),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            brush.BeginAnimation(SolidColorBrush.ColorProperty, pulse);
         }
     }
 
     public void UpdateVisuals()
     {
         var s = Settings;
-        var p = PriceInfo ?? new GoldPriceInfo { XauUsd = 2938.5, XauChangeRate = 0.52, DomesticAu = 686.50, DomesticChangeRate = -0.15 };
+        // 无行情数据时以全零对象占位：各模块直接显示 0.00，让用户直观看到数据未获取到
+        var p = PriceInfo ?? new GoldPriceInfo();
 
         if (s == null) return;
 
@@ -89,6 +119,7 @@ public partial class CapsuleControl : UserControl
         OuterBorder.BorderThickness = new Thickness(1);
 
         // 3. 国际金价 (XAU) 模块控制
+        // 数据获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
         bool hasXau = s.ShowXau && (s.ShowXauLabel || s.ShowXauPrice || s.ShowXauChangeRate);
         XauPanel.Visibility = hasXau ? Visibility.Visible : Visibility.Collapsed;
 
@@ -109,6 +140,7 @@ public partial class CapsuleControl : UserControl
         }
 
         // 4. 国内金价 (AU9999) 模块控制
+        // 数据获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
         bool hasDom = s.ShowDom && (s.ShowDomLabel || s.ShowDomPrice || s.ShowDomChangeRate);
         DomPanel.Visibility = hasDom ? Visibility.Visible : Visibility.Collapsed;
 
@@ -128,8 +160,102 @@ public partial class CapsuleControl : UserControl
             TxtDomRate.Foreground = GetRateBrush(p.DomesticChangeRate, s);
         }
 
-        // 5. 分割线：只有两者都同时存在有效内容时才显示
-        DividerRect.Visibility = (hasXau && hasDom) ? Visibility.Visible : Visibility.Collapsed;
+        // 5. 黄金延期 Au(T+D) 模块控制
+        // 数据获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
+        bool hasAutd = s.ShowAutd && (s.ShowAutdLabel || s.ShowAutdPrice || s.ShowAutdChangeRate);
+        AutdPanel.Visibility = hasAutd ? Visibility.Visible : Visibility.Collapsed;
+
+        if (hasAutd)
+        {
+            TxtAutdLabel.Visibility = s.ShowAutdLabel ? Visibility.Visible : Visibility.Collapsed;
+            TxtAutdLabel.Text = s.AutdLabelText;
+            TxtAutdLabel.Foreground = ParseBrush(s.AutdLabelColor, "#8E8E93");
+
+            int autdDecimals = Math.Max(0, Math.Min(2, s.AutdPriceDecimals));
+            TxtAutdPrice.Visibility = s.ShowAutdPrice ? Visibility.Visible : Visibility.Collapsed;
+            TxtAutdPrice.Text = p.AutdGoldPrice.ToString($"F{autdDecimals}", CultureInfo.InvariantCulture);
+            TxtAutdPrice.Foreground = ParseBrush(s.AutdPriceColor, "#F2F2F7");
+
+            TxtAutdRate.Visibility = s.ShowAutdChangeRate ? Visibility.Visible : Visibility.Collapsed;
+            TxtAutdRate.Text = FormatRate(p.AutdChangeRate, s.ShowAutdSign, s.ShowAutdPercent);
+            TxtAutdRate.Foreground = GetRateBrush(p.AutdChangeRate, s);
+        }
+
+        // 6. 换算金价 (XAU→CNY) 模块控制
+        // 上游数据缺失时换算结果为 0.00，让用户直观看到行情暂不可用
+        bool hasCnv = s.ShowCnv && (s.ShowCnvLabel || s.ShowCnvPrice || s.ShowCnvChangeRate);
+        CnvPanel.Visibility = hasCnv ? Visibility.Visible : Visibility.Collapsed;
+
+        if (hasCnv)
+        {
+            TxtCnvLabel.Visibility = s.ShowCnvLabel ? Visibility.Visible : Visibility.Collapsed;
+            TxtCnvLabel.Text = s.CnvLabelText;
+            TxtCnvLabel.Foreground = ParseBrush(s.CnvLabelColor, "#8E8E93");
+
+            int cnvDecimals = Math.Max(0, Math.Min(2, s.CnvPriceDecimals));
+            TxtCnvPrice.Visibility = s.ShowCnvPrice ? Visibility.Visible : Visibility.Collapsed;
+            TxtCnvPrice.Text = p.CnyGoldPrice.ToString($"F{cnvDecimals}", CultureInfo.InvariantCulture);
+            TxtCnvPrice.Foreground = ParseBrush(s.CnvPriceColor, "#F2F2F7");
+
+            TxtCnvRate.Visibility = s.ShowCnvChangeRate ? Visibility.Visible : Visibility.Collapsed;
+            TxtCnvRate.Text = FormatRate(p.CnyGoldChangeRate, s.ShowCnvSign, s.ShowCnvPercent);
+            TxtCnvRate.Foreground = GetRateBrush(p.CnyGoldChangeRate, s);
+        }
+
+        // 7. 民生积存金模块控制
+        // 京东数据源获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
+        bool hasMs = s.ShowMs && (s.ShowMsLabel || s.ShowMsPrice || s.ShowMsChangeRate);
+        MsPanel.Visibility = hasMs ? Visibility.Visible : Visibility.Collapsed;
+
+        if (hasMs)
+        {
+            TxtMsLabel.Visibility = s.ShowMsLabel ? Visibility.Visible : Visibility.Collapsed;
+            TxtMsLabel.Text = s.MsLabelText;
+            TxtMsLabel.Foreground = ParseBrush(s.MsLabelColor, "#8E8E93");
+
+            int msDecimals = Math.Max(0, Math.Min(2, s.MsPriceDecimals));
+            TxtMsPrice.Visibility = s.ShowMsPrice ? Visibility.Visible : Visibility.Collapsed;
+            TxtMsPrice.Text = p.MsGoldPrice.ToString($"F{msDecimals}", CultureInfo.InvariantCulture);
+            TxtMsPrice.Foreground = ParseBrush(s.MsPriceColor, "#F2F2F7");
+
+            TxtMsRate.Visibility = s.ShowMsChangeRate ? Visibility.Visible : Visibility.Collapsed;
+            TxtMsRate.Text = FormatRate(p.MsChangeRate, s.ShowMsSign, s.ShowMsPercent);
+            TxtMsRate.Foreground = GetRateBrush(p.MsChangeRate, s);
+        }
+
+        // 8. 浙商积存金模块控制
+        // 京东数据源获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
+        bool hasZs = s.ShowZs && (s.ShowZsLabel || s.ShowZsPrice || s.ShowZsChangeRate);
+        ZsPanel.Visibility = hasZs ? Visibility.Visible : Visibility.Collapsed;
+
+        if (hasZs)
+        {
+            TxtZsLabel.Visibility = s.ShowZsLabel ? Visibility.Visible : Visibility.Collapsed;
+            TxtZsLabel.Text = s.ZsLabelText;
+            TxtZsLabel.Foreground = ParseBrush(s.ZsLabelColor, "#8E8E93");
+
+            int zsDecimals = Math.Max(0, Math.Min(2, s.ZsPriceDecimals));
+            TxtZsPrice.Visibility = s.ShowZsPrice ? Visibility.Visible : Visibility.Collapsed;
+            TxtZsPrice.Text = p.ZsGoldPrice.ToString($"F{zsDecimals}", CultureInfo.InvariantCulture);
+            TxtZsPrice.Foreground = ParseBrush(s.ZsPriceColor, "#F2F2F7");
+
+            TxtZsRate.Visibility = s.ShowZsChangeRate ? Visibility.Visible : Visibility.Collapsed;
+            TxtZsRate.Text = FormatRate(p.ZsChangeRate, s.ShowZsSign, s.ShowZsPercent);
+            TxtZsRate.Foreground = GetRateBrush(p.ZsChangeRate, s);
+        }
+
+        // 9. 分割线：全局开关开启、左侧模块可见、且右侧仍存在其它可见模块时才显示
+        bool showDivider = s.ShowDividers;
+        // Divider1 位于 Xau 与 Dom 之间：当 Dom 隐藏但后续模块可见时，由 Divider1 承担分隔
+        Divider1.Visibility = (showDivider && hasXau && (hasDom || hasAutd || hasCnv || hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
+        // Divider2 位于 Dom 与 Autd 之间
+        Divider2.Visibility = (showDivider && hasDom && (hasAutd || hasCnv || hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
+        // Divider3 位于 Autd 与 Cnv 之间
+        Divider3.Visibility = (showDivider && hasAutd && (hasCnv || hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
+        // Divider4 位于 Cnv 与 Ms 之间
+        Divider4.Visibility = (showDivider && hasCnv && (hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
+        // Divider5 位于 Ms 与 Zs 之间
+        Divider5.Visibility = (showDivider && hasMs && hasZs) ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private static string FormatRate(double rate, bool showSign, bool showPercent)

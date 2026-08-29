@@ -19,7 +19,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private AppSettings _settings;
 
-    // 初始设为 null，避免在网络请求未完成前界面闪烁显示 0.00
+    // 初始为 null，胶囊以 0.00 占位展示，让用户直观看到行情尚未获取到
     [ObservableProperty]
     private GoldPriceInfo? _priceData;
 

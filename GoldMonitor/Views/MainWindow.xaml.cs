@@ -114,6 +114,7 @@ public partial class MainWindow : Window
             try
             {
                 DragMove();
+                // 拖拽结束（鼠标释放后 DragMove 返回），一次性写入磁盘
                 ViewModel.SaveWindowPosition(Left, Top);
             }
             catch
@@ -124,9 +125,11 @@ public partial class MainWindow : Window
 
     private void Window_LocationChanged(object? sender, EventArgs e)
     {
+        // 仅更新内存中的位置值，不触发磁盘写入（拖拽过程中每像素都会触发本事件）
         if (IsLoaded)
         {
-            ViewModel.SaveWindowPosition(Left, Top);
+            ViewModel.Settings.WindowLeft = Left;
+            ViewModel.Settings.WindowTop = Top;
         }
     }
 
