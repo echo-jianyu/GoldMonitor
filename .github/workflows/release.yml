@@ -1,37 +1,37 @@
-name: Build and Dual Release
+name: Build and Release
 
-# 触发条件：只要推送形如 v1.0.0, v1.0.1 的版本标签就触发
+# 触发条件：只要推送形如 v1.0.0、v1.0.1 的标签（Tag）就会自动执行
 on:
   push:
     tags:
       - 'v*'
 
+# 赋予自动向 Releases 页面上传文件的权限
 permissions:
   contents: write
 
 jobs:
   build:
-    name: Build & Release to GitHub & Gitee
+    name: Build Single-File EXE
+    # .NET Framework 4.8 必须在 Windows 云端服务器上编译
     runs-on: windows-latest
 
     steps:
-      # 1. 检出仓库源码
+      # 1. 拉取仓库源码
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # 2. 安装 .NET SDK 编译环境
+      # 2. 安装 .NET SDK 环境
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      # 3. 还原依赖项
+      # 3. 还原 NuGet 依赖包
       - name: Restore Dependencies
         run: dotnet restore
 
-      # 4. 编译 Release 单文件 EXE（自动注入 Tag 版本号）
+      # 4. 编译 Release 单文件 EXE，并自动将 Tag 中的版本号注入程序中
       - name: Build Single-File EXE with Version
         shell: bash
         run: |
@@ -39,8 +39,8 @@ jobs:
           echo "Building version: $VERSION"
           dotnet build -c Release --no-restore -p:Version=$VERSION -p:FileVersion=$VERSION -p:AssemblyVersion=$VERSION
 
-      # 5. 发布到 GitHub Releases 并上传 EXE
-      - name: Upload to GitHub Release
+      # 5. 创建 GitHub Release 并自动挂载单文件 EXE 附件
+      - name: Upload EXE to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
@@ -48,23 +48,3 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # 6. 将当前的版本 Tag 同步推送到 Gitee（确保 Gitee 拥有该 Tag）
-      - name: Sync Tag to Gitee
-        shell: bash
-        run: |
-          git remote add gitee_sync "https://echo-jian:${{ secrets.GITEE_TOKEN }}@gitee.com/echo-jian/gold-monitor.git"
-          git push gitee_sync ${{ github.ref_name }} --force
-
-      # 7. 自动创建 Gitee 发行版并同步更新日志与 EXE 附件
-      - name: Upload to Gitee Release
-        uses: yanglbme/gitee-release-action@main
-        with:
-          server: 'https://gitee.com'
-          owner: echo-jian
-          repo: gold-monitor
-          tag: ${{ github.ref_name }}
-          release_name: ${{ github.event.release.name || github.ref_name }}
-          body: ${{ github.event.release.body || '详见 GitHub Release 更新日志。' }}
-          file: '**/bin/Release/net48/*.exe'
-          token: ${{ secrets.GITEE_TOKEN }}
