@@ -78,11 +78,10 @@ public partial class CapsuleControl : UserControl
         {
             control.UpdateVisuals();
 
-            // 数据变化时触发脉冲动画 + 更新时间 Tooltip
+            // 数据变化时触发脉冲动画
             if (e.Property == PriceInfoProperty && e.NewValue is GoldPriceInfo info && info.UpdateTime > DateTime.MinValue)
             {
                 control.PlayRefreshPulse();
-                control.OuterBorder.ToolTip = $"最后更新：{info.UpdateTime:HH:mm:ss}";
             }
         }
     }
