@@ -36,27 +36,42 @@ public partial class CapsuleControl : UserControl
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Settings对象变化，换绑PropertyChanged事件，确保UI能够响应设置的动态变化
+    /// </summary>
+    /// <param name="d"></param>
+    /// <param name="e"></param>
     private static void OnSettingsObjectChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is CapsuleControl control)
         {
             if (e.OldValue is INotifyPropertyChanged oldNpc)
             {
-                oldNpc.PropertyChanged -= control.OnSettingsPropertyChanged;
+                oldNpc.PropertyChanged -= control.OnSettingsPropertyChanged;  // 解绑旧对象事件
             }
             if (e.NewValue is INotifyPropertyChanged newNpc)
             {
-                newNpc.PropertyChanged += control.OnSettingsPropertyChanged;
+                newNpc.PropertyChanged += control.OnSettingsPropertyChanged;   // 绑定新对象事件
             }
             control.UpdateVisuals();
         }
     }
 
+    /// <summary>
+    /// Settings对象的属性变化时触发，更新UI显示
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         UpdateVisuals();
     }
 
+    /// <summary>
+    /// PriceInfo 或 Settings 变化时触发，更新UI显示
+    /// </summary>
+    /// <param name="d"></param>
+    /// <param name="e"></param>
     private static void OnDataOrSettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is CapsuleControl control)
@@ -73,7 +88,7 @@ public partial class CapsuleControl : UserControl
     }
 
     /// <summary>
-    /// 数据刷新脉冲：短暂提亮边框后恢复，给用户"数据已更新"的视觉反馈
+    /// 数据刷新脉冲：短暂提亮边框后恢复，给用户"数据已更新"的视觉反馈 
     /// </summary>
     private void PlayRefreshPulse()
     {
@@ -93,6 +108,9 @@ public partial class CapsuleControl : UserControl
         }
     }
 
+    /// <summary>
+    /// 根据当前的 PriceInfo 和 Settings 更新 UI 显示
+    /// </summary>
     public void UpdateVisuals()
     {
         var s = Settings;
@@ -258,6 +276,13 @@ public partial class CapsuleControl : UserControl
         Divider5.Visibility = (showDivider && hasMs && hasZs) ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    /// <summary>
+    /// 格式化涨跌幅文本，支持显示正负号和百分号
+    /// </summary>
+    /// <param name="rate">涨跌幅</param>
+    /// <param name="showSign">是否显示正负号</param>
+    /// <param name="showPercent">是否显示百分号</param>
+    /// <returns></returns>
     private static string FormatRate(double rate, bool showSign, bool showPercent)
     {
         string sign = "";
@@ -275,13 +300,25 @@ public partial class CapsuleControl : UserControl
         return $"{sign}{rate:F2}{percent}";
     }
 
+    /// <summary>
+    /// 根据涨跌幅返回对应的画刷颜色
+    /// </summary>
+    /// <param name="rate">涨跌幅</param>
+    /// <param name="s">应用设置</param>
+    /// <returns></returns>
     private static Brush GetRateBrush(double rate, AppSettings s)
     {
         if (rate > 0.0001) return ParseBrush(s.UpColor, "#C07D00");
         if (rate < -0.0001) return ParseBrush(s.DownColor, "#4EAF50");
-        return ParseBrush(s.FlatColor, "#8E8E93");
+        return ParseBrush(s.FlatColor, "#8E8E93");  // 平盘
     }
 
+    /// <summary>
+    /// 解析 HEX 字符串为 Brush
+    /// </summary>
+    /// <param name="hex"></param>
+    /// <param name="defaultHex"></param>
+    /// <returns></returns>
     private static Brush ParseBrush(string? hex, string defaultHex)
     {
         try
