@@ -304,78 +304,7 @@ public class AppSettings : ObservableObject
         set => SetProperty(ref _showAutdPercent, value);
     }
 
-    // 6. 换算金价 (XAU→CNY)
-    private bool _showCnv = false;
-    public bool ShowCnv
-    {
-        get => _showCnv;
-        set => SetProperty(ref _showCnv, value);
-    }
-
-    private bool _showCnvLabel = true;
-    public bool ShowCnvLabel
-    {
-        get => _showCnvLabel;
-        set => SetProperty(ref _showCnvLabel, value);
-    }
-
-    private string _cnvLabelText = "换算";
-    public string CnvLabelText
-    {
-        get => _cnvLabelText;
-        set => SetProperty(ref _cnvLabelText, value);
-    }
-
-    private string _cnvLabelColor = "#8E8E93";
-    public string CnvLabelColor
-    {
-        get => _cnvLabelColor;
-        set => SetProperty(ref _cnvLabelColor, value);
-    }
-
-    private bool _showCnvPrice = true;
-    public bool ShowCnvPrice
-    {
-        get => _showCnvPrice;
-        set => SetProperty(ref _showCnvPrice, value);
-    }
-
-    private int _cnvPriceDecimals = 2;
-    public int CnvPriceDecimals
-    {
-        get => _cnvPriceDecimals;
-        set => SetProperty(ref _cnvPriceDecimals, value);
-    }
-
-    private string _cnvPriceColor = "#F2F2F7";
-    public string CnvPriceColor
-    {
-        get => _cnvPriceColor;
-        set => SetProperty(ref _cnvPriceColor, value);
-    }
-
-    private bool _showCnvChangeRate = true;
-    public bool ShowCnvChangeRate
-    {
-        get => _showCnvChangeRate;
-        set => SetProperty(ref _showCnvChangeRate, value);
-    }
-
-    private bool _showCnvSign = true;
-    public bool ShowCnvSign
-    {
-        get => _showCnvSign;
-        set => SetProperty(ref _showCnvSign, value);
-    }
-
-    private bool _showCnvPercent = true;
-    public bool ShowCnvPercent
-    {
-        get => _showCnvPercent;
-        set => SetProperty(ref _showCnvPercent, value);
-    }
-
-    // 7. 京东积存金 - 民生金价
+    // 6. 京东积存金 - 民生金价
     private bool _showMs = false;
     public bool ShowMs
     {
@@ -446,7 +375,7 @@ public class AppSettings : ObservableObject
         set => SetProperty(ref _showMsPercent, value);
     }
 
-    // 8. 京东积存金 - 浙商金价
+    // 7. 京东积存金 - 浙商金价
     private bool _showZs = true;
     public bool ShowZs
     {
@@ -517,7 +446,7 @@ public class AppSettings : ObservableObject
         set => SetProperty(ref _showZsPercent, value);
     }
 
-    // 9. 涨跌配色
+    // 8. 涨跌配色
     private string _upColor = "#C07D00";
     public string UpColor
     {
@@ -600,17 +529,6 @@ public class AppSettings : ObservableObject
         ShowAutdChangeRate = other.ShowAutdChangeRate;
         ShowAutdSign = other.ShowAutdSign;
         ShowAutdPercent = other.ShowAutdPercent;
-
-        ShowCnv = other.ShowCnv;
-        ShowCnvLabel = other.ShowCnvLabel;
-        CnvLabelText = other.CnvLabelText;
-        CnvLabelColor = other.CnvLabelColor;
-        ShowCnvPrice = other.ShowCnvPrice;
-        CnvPriceDecimals = other.CnvPriceDecimals;
-        CnvPriceColor = other.CnvPriceColor;
-        ShowCnvChangeRate = other.ShowCnvChangeRate;
-        ShowCnvSign = other.ShowCnvSign;
-        ShowCnvPercent = other.ShowCnvPercent;
 
         ShowMs = other.ShowMs;
         ShowMsLabel = other.ShowMsLabel;

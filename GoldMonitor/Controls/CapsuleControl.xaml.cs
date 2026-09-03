@@ -198,28 +198,7 @@ public partial class CapsuleControl : UserControl
             TxtAutdRate.Foreground = GetRateBrush(p.AutdChangeRate, s);
         }
 
-        // 6. 换算金价 (XAU→CNY) 模块控制
-        // 上游数据缺失时换算结果为 0.00，让用户直观看到行情暂不可用
-        bool hasCnv = s.ShowCnv && (s.ShowCnvLabel || s.ShowCnvPrice || s.ShowCnvChangeRate);
-        CnvPanel.Visibility = hasCnv ? Visibility.Visible : Visibility.Collapsed;
-
-        if (hasCnv)
-        {
-            TxtCnvLabel.Visibility = s.ShowCnvLabel ? Visibility.Visible : Visibility.Collapsed;
-            TxtCnvLabel.Text = s.CnvLabelText;
-            TxtCnvLabel.Foreground = ParseBrush(s.CnvLabelColor, "#8E8E93");
-
-            int cnvDecimals = Math.Max(0, Math.Min(2, s.CnvPriceDecimals));
-            TxtCnvPrice.Visibility = s.ShowCnvPrice ? Visibility.Visible : Visibility.Collapsed;
-            TxtCnvPrice.Text = p.CnyGoldPrice.ToString($"F{cnvDecimals}", CultureInfo.InvariantCulture);
-            TxtCnvPrice.Foreground = ParseBrush(s.CnvPriceColor, "#F2F2F7");
-
-            TxtCnvRate.Visibility = s.ShowCnvChangeRate ? Visibility.Visible : Visibility.Collapsed;
-            TxtCnvRate.Text = FormatRate(p.CnyGoldChangeRate, s.ShowCnvSign, s.ShowCnvPercent);
-            TxtCnvRate.Foreground = GetRateBrush(p.CnyGoldChangeRate, s);
-        }
-
-        // 7. 民生积存金模块控制
+        // 6. 民生积存金模块控制
         // 京东数据源获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
         bool hasMs = s.ShowMs && (s.ShowMsLabel || s.ShowMsPrice || s.ShowMsChangeRate);
         MsPanel.Visibility = hasMs ? Visibility.Visible : Visibility.Collapsed;
@@ -240,7 +219,7 @@ public partial class CapsuleControl : UserControl
             TxtMsRate.Foreground = GetRateBrush(p.MsChangeRate, s);
         }
 
-        // 8. 浙商积存金模块控制
+        // 7. 浙商积存金模块控制
         // 京东数据源获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
         bool hasZs = s.ShowZs && (s.ShowZsLabel || s.ShowZsPrice || s.ShowZsChangeRate);
         ZsPanel.Visibility = hasZs ? Visibility.Visible : Visibility.Collapsed;
@@ -264,15 +243,13 @@ public partial class CapsuleControl : UserControl
         // 9. 分割线：全局开关开启、左侧模块可见、且右侧仍存在其它可见模块时才显示
         bool showDivider = s.ShowDividers;
         // Divider1 位于 Xau 与 Dom 之间：当 Dom 隐藏但后续模块可见时，由 Divider1 承担分隔
-        Divider1.Visibility = (showDivider && hasXau && (hasDom || hasAutd || hasCnv || hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
+        Divider1.Visibility = (showDivider && hasXau && (hasDom || hasAutd || hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
         // Divider2 位于 Dom 与 Autd 之间
-        Divider2.Visibility = (showDivider && hasDom && (hasAutd || hasCnv || hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
-        // Divider3 位于 Autd 与 Cnv 之间
-        Divider3.Visibility = (showDivider && hasAutd && (hasCnv || hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
-        // Divider4 位于 Cnv 与 Ms 之间
-        Divider4.Visibility = (showDivider && hasCnv && (hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
-        // Divider5 位于 Ms 与 Zs 之间
-        Divider5.Visibility = (showDivider && hasMs && hasZs) ? Visibility.Visible : Visibility.Collapsed;
+        Divider2.Visibility = (showDivider && hasDom && (hasAutd || hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
+        // Divider3 位于 Autd 与 Ms 之间
+        Divider3.Visibility = (showDivider && hasAutd && (hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
+        // Divider4 位于 Ms 与 Zs 之间
+        Divider4.Visibility = (showDivider && hasMs && hasZs) ? Visibility.Visible : Visibility.Collapsed;
     }
 
     /// <summary>

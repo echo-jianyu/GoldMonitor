@@ -435,8 +435,6 @@
                                         <RowDefinition Height="Auto" MinHeight="46"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto" MinHeight="46"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto" MinHeight="46"/>
                                     </Grid.RowDefinitions>
 
                                     <!-- 表头 -->
@@ -478,35 +476,24 @@
 
                                     <Border Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="5" Background="#F2F2F5" Height="1"/>
 
-                                    <!-- 换算金价 XAU→CNY -->
-                                    <CheckBox Grid.Row="7" Grid.Column="0" IsChecked="{Binding Settings.ShowCnv}"/>
-                                    <TextBlock Grid.Row="7" Grid.Column="1" Text="换算金价 (XAU→CNY)" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Row="7" Grid.Column="2" Text="{Binding Settings.CnvLabelText, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <!-- 民生积存金 -->
+                                    <CheckBox Grid.Row="7" Grid.Column="0" IsChecked="{Binding Settings.ShowMs}"/>
+                                    <TextBlock Grid.Row="7" Grid.Column="1" Text="民生积存金 (京东金融)" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="7" Grid.Column="2" Text="{Binding Settings.MsLabelText, UpdateSourceTrigger=PropertyChanged}"/>
                                     <controls:ColorSwatchButton Grid.Row="7" Grid.Column="3" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.CnvLabelColor}"/>
+                                                                ColorHex="{Binding Settings.MsLabelColor}"/>
                                     <controls:ColorSwatchButton Grid.Row="7" Grid.Column="4" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.CnvPriceColor}"/>
+                                                                ColorHex="{Binding Settings.MsPriceColor}"/>
 
                                     <Border Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5" Background="#F2F2F5" Height="1"/>
 
-                                    <!-- 民生积存金 -->
-                                    <CheckBox Grid.Row="9" Grid.Column="0" IsChecked="{Binding Settings.ShowMs}"/>
-                                    <TextBlock Grid.Row="9" Grid.Column="1" Text="民生积存金 (京东金融)" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Row="9" Grid.Column="2" Text="{Binding Settings.MsLabelText, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <controls:ColorSwatchButton Grid.Row="9" Grid.Column="3" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.MsLabelColor}"/>
-                                    <controls:ColorSwatchButton Grid.Row="9" Grid.Column="4" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.MsPriceColor}"/>
-
-                                    <Border Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="5" Background="#F2F2F5" Height="1"/>
-
                                     <!-- 浙商积存金 -->
-                                    <CheckBox Grid.Row="11" Grid.Column="0" IsChecked="{Binding Settings.ShowZs}"/>
-                                    <TextBlock Grid.Row="11" Grid.Column="1" Text="浙商积存金 (京东金融)" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Row="11" Grid.Column="2" Text="{Binding Settings.ZsLabelText, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <controls:ColorSwatchButton Grid.Row="11" Grid.Column="3" HorizontalAlignment="Center"
+                                    <CheckBox Grid.Row="9" Grid.Column="0" IsChecked="{Binding Settings.ShowZs}"/>
+                                    <TextBlock Grid.Row="9" Grid.Column="1" Text="浙商积存金 (京东金融)" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="9" Grid.Column="2" Text="{Binding Settings.ZsLabelText, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <controls:ColorSwatchButton Grid.Row="9" Grid.Column="3" HorizontalAlignment="Center"
                                                                 ColorHex="{Binding Settings.ZsLabelColor}"/>
-                                    <controls:ColorSwatchButton Grid.Row="11" Grid.Column="4" HorizontalAlignment="Center"
+                                    <controls:ColorSwatchButton Grid.Row="9" Grid.Column="4" HorizontalAlignment="Center"
                                                                 ColorHex="{Binding Settings.ZsPriceColor}"/>
                                 </Grid>
                             </StackPanel>
@@ -517,7 +504,7 @@
                             <StackPanel>
                                 <TextBlock Text="数据源说明" Style="{StaticResource CardTitle}"/>
                                 <TextBlock Style="{StaticResource Hint}">
-                                    <Run Text="· 新浪财经：伦敦金 XAU / 上金所 Au9999 / 黄金延期 Au(T+D) / 美元汇率"/>
+                                    <Run Text="· 新浪财经：伦敦金 XAU / 上金所 Au9999 / 黄金延期 Au(T+D)"/>
                                     <LineBreak/>
                                     <Run Text="· 京东金融：民生 / 浙商积存金（数据获取失败时价格显示 0.00）"/>
                                 </TextBlock>

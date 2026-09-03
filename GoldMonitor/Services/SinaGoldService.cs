@@ -11,15 +11,12 @@ namespace GoldMonitor.Services;
 public class SinaGoldService : IGoldService
 {
     private readonly HttpClient _httpClient;
-    private const string ApiUrl = "https://hq.sinajs.cn/list=hf_XAU,gds_AU9999,gds_AUTD,fx_susdcny";
-
-    // 1 金衡盎司 = 31.1034768 克，用于将「美元/盎司」换算为「元/克」
-    private const double GramsPerTroyOunce = 31.1034768;
+    private const string ApiUrl = "https://hq.sinajs.cn/list=hf_XAU,gds_AU9999,gds_AUTD";
 
     public SinaGoldService(HttpClient httpClient)
     {
-            _httpClient = httpClient;
-        }
+        _httpClient = httpClient;
+    }
 
     public async Task<GoldPriceInfo> FetchPricesAsync(CancellationToken ct = default)
     {
@@ -33,7 +30,6 @@ public class SinaGoldService : IGoldService
         double xau = 0, xauLast = 0, xauRate = 0;
         double dom = 0, domLast = 0, domRate = 0;
         double autd = 0, autdLast = 0, autdRate = 0;
-        double fx = 0, fxLast = 0;
 
         // 按分号和换行符切分成单独的语句 
         var statements = response.Split([';', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
@@ -96,47 +92,6 @@ public class SinaGoldService : IGoldService
                     }
                 }
             }
-            // 4. 解析美元兑人民币汇率
-            else if (statement.Contains("fx_susdcny", StringComparison.OrdinalIgnoreCase))
-            {
-                // fx_susdcny 字段：
-                // 0 时间, 1 买入价, 2 卖出价, 3 昨收, 4 成交量, 5 最高, 6 最低, 7 开盘, 8 最新价, ...
-                // 优先取 parts[8] (最新价)，缺失时回退到 parts[1] (买入价) / parts[2] (卖出价)
-                foreach (int idx in new[] { 8, 1, 2 })
-                {
-                    if (idx < parts.Length &&
-                        double.TryParse(parts[idx], NumberStyles.Float, CultureInfo.InvariantCulture, out double v) && v > 0)
-                    {
-                        fx = v;
-                        break;
-                    }
-                }
-
-                // 昨收价：用于换算金价涨跌幅
-                if (parts.Length > 3 &&
-                    double.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out double lastClose) && lastClose > 0)
-                {
-                    fxLast = lastClose;
-                }
-            }
-        }
-
-        // 5. 由国际金价 XAU 按汇率换算国内金价 (元/克)
-        double cnyGold = 0, cnyGoldLast = 0, cnyGoldRate = 0;
-        if (xau > 0 && fx > 0)
-        {
-            cnyGold = xau * fx / GramsPerTroyOunce;
-
-            // 涨跌幅基准：昨收 XAU × 昨收汇率（汇率昨收缺失时回退为当前汇率）
-            double fxRef = fxLast > 0 ? fxLast : fx;
-            if (xauLast > 0)
-            {
-                cnyGoldLast = xauLast * fxRef / GramsPerTroyOunce;
-            }
-            if (cnyGoldLast > 0)
-            {
-                cnyGoldRate = (cnyGold - cnyGoldLast) / cnyGoldLast * 100;
-            }
         }
 
         return new GoldPriceInfo
@@ -150,10 +105,6 @@ public class SinaGoldService : IGoldService
             AutdGoldPrice = autd,
             AutdLastClose = autdLast,
             AutdChangeRate = autdRate,
-            UsdCnyRate = fx,
-            CnyGoldPrice = cnyGold,
-            CnyGoldLastClose = cnyGoldLast,
-            CnyGoldChangeRate = cnyGoldRate,
             UpdateTime = DateTime.Now
         };
     }

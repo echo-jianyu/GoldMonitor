@@ -48,8 +48,6 @@ public partial class SettingsViewModel : ObservableObject
                 DomesticChangeRate = -0.22,
                 AutdGoldPrice = 688.30,
                 AutdChangeRate = -0.18,
-                CnyGoldPrice = 688.30,
-                CnyGoldChangeRate = -0.26,
                 MsGoldPrice = 990.46,
                 MsChangeRate = -0.48,
                 ZsGoldPrice = 990.79,
@@ -67,7 +65,7 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     // ===================== 统一显示规则 =====================
-    // 一处设置，同步写入全部 6 个模块（XAU / AU / AuTD / 换算 / 民生 / 浙商），
+    // 一处设置，同步写入全部 5 个模块（XAU / AU / AuTD / 民生 / 浙商），
     // 读取时以 XAU 模块为基准（历史配置各模块不一致时以首个为准）
 
     public bool UnifiedShowLabel
@@ -78,7 +76,6 @@ public partial class SettingsViewModel : ObservableObject
             Settings.ShowXauLabel = value;
             Settings.ShowDomLabel = value;
             Settings.ShowAutdLabel = value;
-            Settings.ShowCnvLabel = value;
             Settings.ShowMsLabel = value;
             Settings.ShowZsLabel = value;
         }
@@ -92,7 +89,6 @@ public partial class SettingsViewModel : ObservableObject
             Settings.ShowXauPrice = value;
             Settings.ShowDomPrice = value;
             Settings.ShowAutdPrice = value;
-            Settings.ShowCnvPrice = value;
             Settings.ShowMsPrice = value;
             Settings.ShowZsPrice = value;
         }
@@ -106,7 +102,6 @@ public partial class SettingsViewModel : ObservableObject
             Settings.ShowXauChangeRate = value;
             Settings.ShowDomChangeRate = value;
             Settings.ShowAutdChangeRate = value;
-            Settings.ShowCnvChangeRate = value;
             Settings.ShowMsChangeRate = value;
             Settings.ShowZsChangeRate = value;
         }
@@ -120,7 +115,6 @@ public partial class SettingsViewModel : ObservableObject
             Settings.ShowXauSign = value;
             Settings.ShowDomSign = value;
             Settings.ShowAutdSign = value;
-            Settings.ShowCnvSign = value;
             Settings.ShowMsSign = value;
             Settings.ShowZsSign = value;
         }
@@ -134,7 +128,6 @@ public partial class SettingsViewModel : ObservableObject
             Settings.ShowXauPercent = value;
             Settings.ShowDomPercent = value;
             Settings.ShowAutdPercent = value;
-            Settings.ShowCnvPercent = value;
             Settings.ShowMsPercent = value;
             Settings.ShowZsPercent = value;
         }
@@ -148,7 +141,6 @@ public partial class SettingsViewModel : ObservableObject
             Settings.XauPriceDecimals = value;
             Settings.DomPriceDecimals = value;
             Settings.AutdPriceDecimals = value;
-            Settings.CnvPriceDecimals = value;
             Settings.MsPriceDecimals = value;
             Settings.ZsPriceDecimals = value;
         }
@@ -219,11 +211,10 @@ public partial class SettingsViewModel : ObservableObject
         bool hasXauContent = Settings.ShowXau && (Settings.ShowXauLabel || Settings.ShowXauPrice || Settings.ShowXauChangeRate);
         bool hasDomContent = Settings.ShowDom && (Settings.ShowDomLabel || Settings.ShowDomPrice || Settings.ShowDomChangeRate);
         bool hasAutdContent = Settings.ShowAutd && (Settings.ShowAutdLabel || Settings.ShowAutdPrice || Settings.ShowAutdChangeRate);
-        bool hasCnvContent = Settings.ShowCnv && (Settings.ShowCnvLabel || Settings.ShowCnvPrice || Settings.ShowCnvChangeRate);
         bool hasMsContent = Settings.ShowMs && (Settings.ShowMsLabel || Settings.ShowMsPrice || Settings.ShowMsChangeRate);
         bool hasZsContent = Settings.ShowZs && (Settings.ShowZsLabel || Settings.ShowZsPrice || Settings.ShowZsChangeRate);
 
-        if (!hasXauContent && !hasDomContent && !hasAutdContent && !hasCnvContent && !hasMsContent && !hasZsContent)
+        if (!hasXauContent && !hasDomContent && !hasAutdContent && !hasMsContent && !hasZsContent)
         {
             MessageBox.Show(
                 "请至少保留一项可见的内容（如标签、价格或涨跌幅）！\n不能将所有显示内容全部关闭。",
@@ -239,7 +230,6 @@ public partial class SettingsViewModel : ObservableObject
         Settings.XauPriceDecimals = Math.Max(0, Math.Min(Settings.XauPriceDecimals, 2));
         Settings.DomPriceDecimals = Math.Max(0, Math.Min(Settings.DomPriceDecimals, 2));
         Settings.AutdPriceDecimals = Math.Max(0, Math.Min(Settings.AutdPriceDecimals, 2));
-        Settings.CnvPriceDecimals = Math.Max(0, Math.Min(Settings.CnvPriceDecimals, 2));
         Settings.MsPriceDecimals = Math.Max(0, Math.Min(Settings.MsPriceDecimals, 2));
         Settings.ZsPriceDecimals = Math.Max(0, Math.Min(Settings.ZsPriceDecimals, 2));
         Settings.IdleOpacity = Math.Max(0.05, Math.Min(Settings.IdleOpacity, 1.0));
