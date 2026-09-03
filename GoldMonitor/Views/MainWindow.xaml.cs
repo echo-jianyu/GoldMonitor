@@ -141,16 +141,6 @@ public partial class MainWindow : Window
         BeginAnimation(OpacityProperty, anim);
     }
     #endregion
-    private void Window_LocationChanged(object? sender, EventArgs e)
-    {
-        // 仅更新内存中的位置值，不触发磁盘写入（拖拽过程中每像素都会触发本事件）
-        if (IsLoaded)
-        {
-            ViewModel.Settings.WindowLeft = Left;
-            ViewModel.Settings.WindowTop = Top;
-        }
-    }
-
 
     #region 右键菜单事件
     /// <summary>
