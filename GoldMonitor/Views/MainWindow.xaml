@@ -16,19 +16,21 @@
         MouseLeave="Window_MouseLeave">
 
     <Window.Resources>
-        <!-- 右键菜单容器：白色圆角卡片 + 柔和投影（外圈 Margin 为投影留绘制空间） -->
+        <!-- 右键菜单容器 -->
         <ControlTemplate x:Key="CapsuleContextMenuTemplate" TargetType="ContextMenu">
             <Border Margin="8" Background="White" CornerRadius="10"
                     BorderBrush="#E8E8ED" BorderThickness="1" Padding="6"
                     SnapsToDevicePixels="True">
+                <!-- 柔和阴影 -->
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="16" ShadowDepth="2" Direction="270" Opacity="0.16"/>
                 </Border.Effect>
+                <!-- ItemsPresenter占位符，代表子菜单项（MenuItem）最终显示的位置 -->
                 <ItemsPresenter/>
             </Border>
         </ControlTemplate>
 
-        <!-- 菜单项：与设置页侧边导航一致的扁平圆角高亮 -->
+        <!-- 菜单项 -->
         <ControlTemplate x:Key="CapsuleMenuItemTemplate" TargetType="MenuItem">
             <Border x:Name="Bd" CornerRadius="8" Padding="10,8" Margin="0,1" Background="Transparent">
                 <Grid>
@@ -44,9 +46,11 @@
                 </Grid>
             </Border>
             <ControlTemplate.Triggers>
+                <!-- 触发器：鼠标移上去时，自动将背景变为浅灰色 #F2F2F7 -->
                 <Trigger Property="IsHighlighted" Value="True">
                     <Setter TargetName="Bd" Property="Background" Value="#F2F2F7"/>
                 </Trigger>
+                <!-- 触发器：菜单项禁用时，降低透明度 -->
                 <Trigger Property="IsEnabled" Value="False">
                     <Setter Property="Opacity" Value="0.45"/>
                 </Trigger>
@@ -72,15 +76,14 @@
             <ContextMenu Template="{StaticResource CapsuleContextMenuTemplate}"
                          FontFamily="Microsoft YaHei UI" FontSize="13" Foreground="#1D1D1F"
                          MinWidth="160" HorizontalOffset="-6" VerticalOffset="-6">
-                <!-- 隐式菜单项样式。注意不能用 ItemContainerStyle：
-                     ContextMenu 会把 Separator 也当作容器，MenuItem 样式套上去会抛类型异常 -->
+                <!-- 隐式菜单项样式。注意不能用 ItemContainerStyle：ContextMenu 会把 Separator 也当作容器，MenuItem 样式套上去会抛类型异常 -->
                 <ContextMenu.Resources>
                     <Style TargetType="MenuItem">
                         <Setter Property="Template" Value="{StaticResource CapsuleMenuItemTemplate}"/>
                     </Style>
                 </ContextMenu.Resources>
 
-                <MenuItem Header="设置" Click="MenuSettings_Click" FontWeight="SemiBold">
+                <MenuItem Header="设置" Click="MenuSettings_Click" FontWeight="SemiBold">  <!-- 加粗显示 -->
                     <MenuItem.Icon>
                         <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#8E8E93"/>
                     </MenuItem.Icon>
@@ -90,7 +93,7 @@
                         <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#8E8E93"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <Separator Style="{StaticResource CapsuleSeparatorStyle}"/>
+                <Separator Style="{StaticResource CapsuleSeparatorStyle}"/>  <!-- 分隔线 -->
                 <MenuItem Header="退出程序" Click="MenuExit_Click">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#8E8E93"/>

@@ -24,7 +24,7 @@ public partial class MainWindow : Window
         {
             this.HideFromAltTab(); // 从 Alt+Tab 中隐藏
             RestorePosition();     // 恢复记忆坐标
-            ApplyInitialOpacity(); // 应用初始潜伏透明度
+            ApplyInitialOpacity(); // 应用初始透明度
 
             // 启动全屏检测定时器
             _fullScreenCheckTimer = new DispatcherTimer
@@ -36,12 +36,35 @@ public partial class MainWindow : Window
         };
     }
 
+    // 初始化：恢复窗口位置（记忆坐标）
+    private void RestorePosition()
+    {
+        double left = ViewModel.Settings.WindowLeft ?? (SystemParameters.WorkArea.Right - 260);  // 默认右下角
+        double top = ViewModel.Settings.WindowTop ?? (SystemParameters.WorkArea.Bottom - 60);
+
+        // 校验位置是否超出屏幕可见区域
+        if (left < SystemParameters.VirtualScreenLeft || left > SystemParameters.VirtualScreenLeft + SystemParameters.VirtualScreenWidth - 50)
+            left = SystemParameters.WorkArea.Right - 260;
+
+        if (top < SystemParameters.VirtualScreenTop || top > SystemParameters.VirtualScreenTop + SystemParameters.VirtualScreenHeight - 30)
+            top = SystemParameters.WorkArea.Bottom - 60;
+
+        Left = left;
+        Top = top;
+    }
+
+    // 初始化：应用初始透明度
+    private void ApplyInitialOpacity()
+    {
+        Opacity = ViewModel.Settings.IdleOpacity;
+    }
+
     // 核心全屏检测方法
     private void CheckFullScreenState()
     {
         if (ViewModel?.Settings == null) return;
 
-        // 如果用户在设置里勾选了“全屏时自动隐藏”
+        // 开启全屏时自动隐藏
         if (ViewModel.Settings.AutoHideOnFullScreen)
         {
             bool isFullScreen = FullScreenHelper.IsFullScreenAppRunning();
@@ -63,39 +86,50 @@ public partial class MainWindow : Window
         }
     }
 
-    private void RestorePosition()
+    // 鼠标左键事件：窗口拖拽与位置记忆
+    private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        double left = ViewModel.Settings.WindowLeft ?? (SystemParameters.WorkArea.Right - 260);
-        double top = ViewModel.Settings.WindowTop ?? (SystemParameters.WorkArea.Bottom - 60);
-
-        // 校验位置是否超出屏幕可见区域
-        if (left < SystemParameters.VirtualScreenLeft || left > SystemParameters.VirtualScreenLeft + SystemParameters.VirtualScreenWidth - 50)
-            left = SystemParameters.WorkArea.Right - 260;
-
-        if (top < SystemParameters.VirtualScreenTop || top > SystemParameters.VirtualScreenTop + SystemParameters.VirtualScreenHeight - 30)
-            top = SystemParameters.WorkArea.Bottom - 60;
-
-        Left = left;
-        Top = top;
+        if (e.LeftButton == MouseButtonState.Pressed)
+        {
+            try
+            {
+                DragMove();  // 阻塞，直到拖拽结束鼠标左键释放
+                ViewModel.SaveWindowPosition(Left, Top);  // 拖拽结束后保存位置到磁盘
+            }
+            catch
+            {
+            }
+        }
     }
 
-    private void ApplyInitialOpacity()
-    {
-        Opacity = ViewModel.Settings.IdleOpacity;
-    }
-
+    #region 鼠标悬浮与潜伏透明度动画
+    /// <summary>
+    /// 鼠标进入窗口时触发
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void Window_MouseEnter(object sender, MouseEventArgs e)
     {
         _isMouseOver = true;
         AnimateOpacity(ViewModel.Settings.HoverOpacity, TimeSpan.FromMilliseconds(120));
     }
 
+    /// <summary>
+    /// 鼠标离开窗口时触发
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void Window_MouseLeave(object sender, MouseEventArgs e)
     {
         _isMouseOver = false;
         AnimateOpacity(ViewModel.Settings.IdleOpacity, TimeSpan.FromMilliseconds(300));
     }
 
+    /// <summary>
+    /// 使用动画平滑过渡窗口透明度
+    /// </summary>
+    /// <param name="toValue"></param>
+    /// <param name="duration"></param>
     private void AnimateOpacity(double toValue, TimeSpan duration)
     {
         var anim = new DoubleAnimation
@@ -106,23 +140,7 @@ public partial class MainWindow : Window
         };
         BeginAnimation(OpacityProperty, anim);
     }
-
-    private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.LeftButton == MouseButtonState.Pressed)
-        {
-            try
-            {
-                DragMove();
-                // 拖拽结束（鼠标释放后 DragMove 返回），一次性写入磁盘
-                ViewModel.SaveWindowPosition(Left, Top);
-            }
-            catch
-            {
-            }
-        }
-    }
-
+    #endregion
     private void Window_LocationChanged(object? sender, EventArgs e)
     {
         // 仅更新内存中的位置值，不触发磁盘写入（拖拽过程中每像素都会触发本事件）
@@ -133,6 +151,13 @@ public partial class MainWindow : Window
         }
     }
 
+
+    #region 右键菜单事件
+    /// <summary>
+    /// 打开设置窗口菜单点击事件
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void MenuSettings_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.OpenSettings();
@@ -149,9 +174,15 @@ public partial class MainWindow : Window
         MainCapsule.UpdateVisuals();
     }
 
+    /// <summary>
+    /// 退出应用菜单点击事件
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void MenuExit_Click(object sender, RoutedEventArgs e)
     {
         _fullScreenCheckTimer?.Stop();
         Application.Current.Shutdown();
     }
+    #endregion
 }

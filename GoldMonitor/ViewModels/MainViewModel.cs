@@ -19,7 +19,6 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private AppSettings _settings;
 
-    // 初始为 null，胶囊以 0.00 占位展示，让用户直观看到行情尚未获取到
     [ObservableProperty]
     private GoldPriceInfo? _priceData;
 
@@ -29,20 +28,29 @@ public partial class MainViewModel : ObservableObject
         _configService = configService;
         _settings = _configService.LoadConfig();
 
+        // 初始化定时器
         _timer = new DispatcherTimer();
         UpdateTimerInterval();
         _timer.Tick += async (_, _) => await RefreshDataAsync();
         _timer.Start();
 
+        // 立即刷新一次
         _ = RefreshDataAsync();
     }
 
+    /// <summary>
+    /// 根据配置更新定时器的刷新间隔
+    /// </summary>
     public void UpdateTimerInterval()
     {
-        int seconds = Math.Max(1, Math.Min(Settings.RefreshIntervalSeconds, 3600));
+        int seconds = Math.Max(1, Math.Min(Settings.RefreshIntervalSeconds, 3600));  // 1~3600秒
         _timer.Interval = TimeSpan.FromSeconds(seconds);
     }
 
+    /// <summary>
+    /// 刷新获取一次数据
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
     public async Task RefreshDataAsync()
     {
@@ -60,6 +68,9 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// 打开设置窗口
+    /// </summary>
     [RelayCommand]
     public void OpenSettings()
     {
@@ -78,6 +89,11 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// 保存窗口位置到配置文件
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="top"></param>
     public void SaveWindowPosition(double left, double top)
     {
         Settings.WindowLeft = left;
