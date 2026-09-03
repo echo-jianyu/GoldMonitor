@@ -38,9 +38,10 @@ public class CompositeGoldService : IGoldService
             throw new HttpRequestException("所有行情数据源均请求失败");
         }
 
-        var result = sina ?? new GoldPriceInfo();
+        var result = sina ?? new GoldPriceInfo();  // 新浪金融
         if (jd != null)
         {
+            // 京东积存金
             result.MsGoldPrice = jd.MsGoldPrice;
             result.MsChangeRate = jd.MsChangeRate;
             result.ZsGoldPrice = jd.ZsGoldPrice;

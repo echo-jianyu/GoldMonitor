@@ -16,28 +16,13 @@ public class SinaGoldService : IGoldService
     // 1 金衡盎司 = 31.1034768 克，用于将「美元/盎司」换算为「元/克」
     private const double GramsPerTroyOunce = 31.1034768;
 
-    public SinaGoldService(HttpClient? httpClient = null)
+    public SinaGoldService(HttpClient httpClient)
     {
-        if (httpClient != null)
-        {
             _httpClient = httpClient;
         }
-        else
-        {
-            _httpClient = new HttpClient
-            {
-                Timeout = TimeSpan.FromSeconds(10)
-            };
-            _httpClient.DefaultRequestHeaders.Add("Referer", "https://finance.sina.com.cn");
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-        }
-    }
 
     public async Task<GoldPriceInfo> FetchPricesAsync(CancellationToken ct = default)
     {
-        // 1. 拼接毫秒时间戳，防止代理缓存
-        //long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        //string requestUrl = $"{ApiUrl}&_={timestamp}";
         string requestUrl = $"{ApiUrl}";
 
         using var responseMessage = await _httpClient.GetAsync(requestUrl, ct);

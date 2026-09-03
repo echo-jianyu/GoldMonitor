@@ -11,7 +11,6 @@ namespace GoldMonitor;
 public partial class App : Application
 {
     private static Mutex? _mutex;
-    public static HttpClient HttpClient { get; private set; } = null!;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -26,24 +25,26 @@ public partial class App : Application
             return;
         }
 
-        // 2. 初始化全局 HttpClient（新浪行情）
-        var handler = new HttpClientHandler();
-        HttpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(10) };
+        // 2. 初始化新浪行情 HttpClient
+        var sinaHttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
         // sina反防盗链
-        HttpClient.DefaultRequestHeaders.Add("Referer", "https://finance.sina.com.cn");
-        HttpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+        sinaHttpClient.DefaultRequestHeaders.Add("Referer", "https://finance.sina.com.cn");
+        sinaHttpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+        // 禁用缓存，确保拿到最新行情
+        sinaHttpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
 
-        // 3. 京东积存金专用 HttpClient（防盗链请求头不同，需独立实例）
+        // 3. 京东积存金 HttpClient
         var jdHttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
         jdHttpClient.DefaultRequestHeaders.Add("Referer", "https://jdjr.jd.com/");
         jdHttpClient.DefaultRequestHeaders.Add("Origin", "https://jdjr.jd.com");
         jdHttpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+        jdHttpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
 
         base.OnStartup(e);
 
-        // 4. 依赖组装与启动（新浪行情 + 京东积存金，组合服务内部独立容错）
+        // 4. 依赖组装与启动
         var configService = new ConfigService();
-        var goldService = new CompositeGoldService(new SinaGoldService(HttpClient), new JdGoldService(jdHttpClient));
+        var goldService = new CompositeGoldService(new SinaGoldService(sinaHttpClient), new JdGoldService(jdHttpClient));
         var mainViewModel = new MainViewModel(goldService, configService);
 
         var mainWindow = new MainWindow

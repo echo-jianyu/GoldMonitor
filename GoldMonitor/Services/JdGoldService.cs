@@ -16,23 +16,9 @@ public class JdGoldService : IGoldService
     private readonly HttpClient _httpClient;
     private const string ApiUrl = "https://ms.jr.jd.com/gw2/generic/CreatorSer/pc/m/pcQueryGoldProduct";
 
-    public JdGoldService(HttpClient? httpClient = null)
+    public JdGoldService(HttpClient httpClient)
     {
-        if (httpClient != null)
-        {
-            _httpClient = httpClient;
-        }
-        else
-        {
-            _httpClient = new HttpClient
-            {
-                Timeout = TimeSpan.FromSeconds(10)
-            };
-            // 京东金融接口防盗链所需的请求头（与新浪不同，需独立的 HttpClient）
-            _httpClient.DefaultRequestHeaders.Add("Referer", "https://jdjr.jd.com/");
-            _httpClient.DefaultRequestHeaders.Add("Origin", "https://jdjr.jd.com");
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-        }
+        _httpClient = httpClient;
     }
 
     public async Task<GoldPriceInfo> FetchPricesAsync(CancellationToken ct = default)
