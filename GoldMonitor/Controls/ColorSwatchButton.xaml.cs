@@ -58,17 +58,27 @@ public partial class ColorSwatchButton : UserControl
         UpdateSwatchVisual();
     }
 
+    /// <summary>
+    /// 预设调色板色块点击事件：同步HEX输入框，更新ColorHex，关闭色板弹窗
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void PresetSwatch_Click(object sender, MouseButtonEventArgs e)
     {
         if (sender is Border { Tag: string hex })
         {
-            // 同步 HEX 输入框，避免弹窗关闭触发 LostFocus 时把旧值写回
+            // 同步HEX输入框，避免弹窗关闭触发LostFocus时把旧值写回
             HexInput.Text = hex;
             SetCurrentValue(ColorHexProperty, hex);
             PalettePopup.IsOpen = false;
         }
     }
 
+    /// <summary>
+    /// 颜色按钮点击事件：弹出调色板，聚焦HEX输入框并全选
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void SwatchButton_Click(object sender, RoutedEventArgs e)
     {
         HexInput.Text = ColorHex ?? string.Empty;
@@ -77,6 +87,11 @@ public partial class ColorSwatchButton : UserControl
         HexInput.SelectAll();
     }
 
+    /// <summary>
+    /// HEX输入框按键事件：按Enter键提交输入，关闭色板弹窗
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void HexInput_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
@@ -86,13 +101,18 @@ public partial class ColorSwatchButton : UserControl
         }
     }
 
+    /// <summary>
+    /// HEX输入框失去焦点事件：提交输入，非法值回退为当前颜色
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void HexInput_LostFocus(object sender, RoutedEventArgs e)
     {
         CommitHexInput();
     }
 
     /// <summary>
-    /// 提交自定义 HEX 输入，非法值回退为当前颜色
+    /// 提交自定义HEX输入，非法值回退为当前颜色
     /// </summary>
     private void CommitHexInput()
     {
@@ -108,6 +128,11 @@ public partial class ColorSwatchButton : UserControl
         }
     }
 
+    /// <summary>
+    /// 颜色HEX值变化事件
+    /// </summary>
+    /// <param name="d"></param>
+    /// <param name="e"></param>
     private static void OnColorHexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is ColorSwatchButton control)
@@ -116,6 +141,9 @@ public partial class ColorSwatchButton : UserControl
         }
     }
 
+    /// <summary>
+    /// 更新颜色按钮的视觉效果
+    /// </summary>
     private void UpdateSwatchVisual()
     {
         // XAML 解析期属性可能早于子元素创建，做空值保护
@@ -129,6 +157,7 @@ public partial class ColorSwatchButton : UserControl
         }
     }
 
+    // 辅助方法：验证HEX颜色值是否合法
     private static bool IsValidColor(string? hex)
     {
         try
@@ -141,6 +170,7 @@ public partial class ColorSwatchButton : UserControl
         }
     }
 
+    // 辅助方法：将HEX颜色值解析为Brush，非法值返回透明色
     private static Brush ParseBrush(string? hex)
     {
         try

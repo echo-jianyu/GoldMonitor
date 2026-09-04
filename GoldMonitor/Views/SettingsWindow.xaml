@@ -246,8 +246,7 @@
                             <StackPanel>
                                 <TextBlock Text="运行" Style="{StaticResource CardTitle}"/>
                                 <CheckBox Content="开机时自动启动" IsChecked="{Binding Settings.AutoStart}"/>
-                                <CheckBox Content="全屏应用 / 游戏 / 视频时自动隐藏 (免打扰)"
-                                          IsChecked="{Binding Settings.AutoHideOnFullScreen}" Margin="0,10,0,0"/>
+                                <CheckBox Content="全屏应用 / 游戏 / 视频时自动隐藏 (免打扰)" IsChecked="{Binding Settings.AutoHideOnFullScreen}" Margin="0,10,0,0"/>
                                 <Grid Margin="0,14,0,0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="110"/>

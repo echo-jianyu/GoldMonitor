@@ -64,10 +64,9 @@ public partial class SettingsViewModel : ObservableObject
             .ToList();
     }
 
-    // ===================== 统一显示规则 =====================
-    // 一处设置，同步写入全部 5 个模块（XAU / AU / AuTD / 民生 / 浙商），
-    // 读取时以 XAU 模块为基准（历史配置各模块不一致时以首个为准）
-
+    /// <summary>
+    /// 是否显示标签
+    /// </summary>
     public bool UnifiedShowLabel
     {
         get => Settings.ShowXauLabel;
@@ -81,6 +80,9 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// 是否显示价格
+    /// </summary>
     public bool UnifiedShowPrice
     {
         get => Settings.ShowXauPrice;
@@ -94,6 +96,9 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// 是否显示涨跌幅
+    /// </summary>
     public bool UnifiedShowRate
     {
         get => Settings.ShowXauChangeRate;
@@ -107,6 +112,9 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// 是否显示涨跌符号（+/-）
+    /// </summary>
     public bool UnifiedSign
     {
         get => Settings.ShowXauSign;
@@ -120,6 +128,9 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// 是否显示涨跌百分比
+    /// </summary>
     public bool UnifiedPercent
     {
         get => Settings.ShowXauPercent;
@@ -133,6 +144,9 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// 小数位数（0~2）
+    /// </summary>
     public int UnifiedDecimals
     {
         get => Settings.XauPriceDecimals;
@@ -146,6 +160,7 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    // Settings属性变化：
     private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         OnPropertyChanged(nameof(UnifiedShowLabel));
@@ -156,6 +171,9 @@ public partial class SettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(UnifiedDecimals));
     }
 
+    /// <summary>
+    /// 恢复默认设置
+    /// </summary>
     [RelayCommand]
     public void ResetToDefaults()
     {
@@ -172,7 +190,10 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
-    // 快捷色彩预设方案
+    /// <summary>
+    /// 应用预设配色方案
+    /// </summary>
+    /// <param name="preset"></param>
     [RelayCommand]
     public void ApplyColorPreset(string preset)
     {
@@ -193,7 +214,10 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
-    // 设置缩放比例
+    /// <summary>
+    /// 设置缩放比例
+    /// </summary>
+    /// <param name="scaleStr"></param>
     [RelayCommand]
     public void SetScale(string scaleStr)
     {
@@ -203,7 +227,9 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
-    // 保存配置
+    /// <summary>
+    /// 保存设置并关闭窗口
+    /// </summary>
     [RelayCommand]
     public void Save()
     {
@@ -238,6 +264,9 @@ public partial class SettingsViewModel : ObservableObject
         RequestCloseSuccess?.Invoke();
     }
 
+    /// <summary>
+    /// 取消
+    /// </summary>
     [RelayCommand]
     public void Cancel()
     {
