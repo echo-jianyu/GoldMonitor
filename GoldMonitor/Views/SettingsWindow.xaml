@@ -389,7 +389,7 @@
                         <Border Style="{StaticResource Card}">
                             <StackPanel>
                                 <TextBlock Text="显示规则" Style="{StaticResource CardTitle}"/>
-                                <TextBlock Text="以下开关会同步应用到全部 6 个模块，无需逐个配置" Style="{StaticResource Hint}"/>
+                                <TextBlock Text="以下开关会同步应用到全部 5 个模块，无需逐个配置" Style="{StaticResource Hint}"/>
                                 <WrapPanel Margin="0,12,0,0">
                                     <CheckBox Content="标签" IsChecked="{Binding UnifiedShowLabel}" Margin="0,0,18,10"/>
                                     <CheckBox Content="价格" IsChecked="{Binding UnifiedShowPrice}" Margin="0,0,18,10"/>
