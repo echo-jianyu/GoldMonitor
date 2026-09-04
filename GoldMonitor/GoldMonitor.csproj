@@ -30,7 +30,6 @@
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="System.Text.Json" Version="8.0.5" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
 		<!-- 引入单文件自动嵌入工具，将所有依赖的DLL打入单个EXE内部 -->
 		<PackageReference Include="Costura.Fody" Version="5.7.0">
 			<PrivateAssets>all</PrivateAssets>
