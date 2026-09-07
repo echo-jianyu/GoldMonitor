@@ -1,472 +1,211 @@
-using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace GoldMonitor.Models;
 
-public class AppSettings : ObservableObject
+public partial class AppSettings : ObservableObject
 {
     // 1. 行为与常规
+    [ObservableProperty]
     private bool _autoStart = false;
-    public bool AutoStart
-    {
-        get => _autoStart;
-        set => SetProperty(ref _autoStart, value);
-    }
 
+    [ObservableProperty]
     private bool _autoHideOnFullScreen = true;
-    public bool AutoHideOnFullScreen
-    {
-        get => _autoHideOnFullScreen;
-        set => SetProperty(ref _autoHideOnFullScreen, value);
-    }
 
+    [ObservableProperty]
     private int _refreshIntervalSeconds = 5;
-    public int RefreshIntervalSeconds
-    {
-        get => _refreshIntervalSeconds;
-        set => SetProperty(ref _refreshIntervalSeconds, value);
-    }
 
+    [ObservableProperty]
     private double? _windowLeft;
-    public double? WindowLeft
-    {
-        get => _windowLeft;
-        set => SetProperty(ref _windowLeft, value);
-    }
 
+    [ObservableProperty]
     private double? _windowTop;
-    public double? WindowTop
-    {
-        get => _windowTop;
-        set => SetProperty(ref _windowTop, value);
-    }
 
     // 2. 外观与透明度
+    [ObservableProperty]
     private double _uiScale = 1.25;
-    public double UiScale
-    {
-        get => _uiScale;
-        set => SetProperty(ref _uiScale, value);
-    }
 
+    [ObservableProperty]
     private string _capsuleBackground = "#D918181A";
-    public string CapsuleBackground
-    {
-        get => _capsuleBackground;
-        set => SetProperty(ref _capsuleBackground, value);
-    }
 
+    [ObservableProperty]
     private string _capsuleBorderColor = "#25FFFFFF";
-    public string CapsuleBorderColor
-    {
-        get => _capsuleBorderColor;
-        set => SetProperty(ref _capsuleBorderColor, value);
-    }
 
+    [ObservableProperty]
     private double _idleOpacity = 0.20;
-    public double IdleOpacity
-    {
-        get => _idleOpacity;
-        set => SetProperty(ref _idleOpacity, value);
-    }
 
+    [ObservableProperty]
     private double _hoverOpacity = 0.90;
-    public double HoverOpacity
-    {
-        get => _hoverOpacity;
-        set => SetProperty(ref _hoverOpacity, value);
-    }
 
+    [ObservableProperty]
     private string _fontFamily = "Microsoft YaHei UI";
-    public string FontFamily
-    {
-        get => _fontFamily;
-        set => SetProperty(ref _fontFamily, value);
-    }
 
+    [ObservableProperty]
     private bool _showDividers = true;
-    public bool ShowDividers
-    {
-        get => _showDividers;
-        set => SetProperty(ref _showDividers, value);
-    }
 
     // 3. 国际金价 (XAU)
+    [ObservableProperty]
     private bool _showXau = true;
-    public bool ShowXau
-    {
-        get => _showXau;
-        set => SetProperty(ref _showXau, value);
-    }
 
+    [ObservableProperty]
     private bool _showXauLabel = true;
-    public bool ShowXauLabel
-    {
-        get => _showXauLabel;
-        set => SetProperty(ref _showXauLabel, value);
-    }
 
+    [ObservableProperty]
     private string _xauLabelText = "XAU";
-    public string XauLabelText
-    {
-        get => _xauLabelText;
-        set => SetProperty(ref _xauLabelText, value);
-    }
 
+    [ObservableProperty]
     private string _xauLabelColor = "#8E8E93";
-    public string XauLabelColor
-    {
-        get => _xauLabelColor;
-        set => SetProperty(ref _xauLabelColor, value);
-    }
 
+    [ObservableProperty]
     private bool _showXauPrice = true;
-    public bool ShowXauPrice
-    {
-        get => _showXauPrice;
-        set => SetProperty(ref _showXauPrice, value);
-    }
 
+    [ObservableProperty]
     private int _xauPriceDecimals = 2;
-    public int XauPriceDecimals
-    {
-        get => _xauPriceDecimals;
-        set => SetProperty(ref _xauPriceDecimals, value);
-    }
 
+    [ObservableProperty]
     private string _xauPriceColor = "#F2F2F7";
-    public string XauPriceColor
-    {
-        get => _xauPriceColor;
-        set => SetProperty(ref _xauPriceColor, value);
-    }
 
+    [ObservableProperty]
     private bool _showXauChangeRate = true;
-    public bool ShowXauChangeRate
-    {
-        get => _showXauChangeRate;
-        set => SetProperty(ref _showXauChangeRate, value);
-    }
 
+    [ObservableProperty]
     private bool _showXauSign = true;
-    public bool ShowXauSign
-    {
-        get => _showXauSign;
-        set => SetProperty(ref _showXauSign, value);
-    }
 
+    [ObservableProperty]
     private bool _showXauPercent = true;
-    public bool ShowXauPercent
-    {
-        get => _showXauPercent;
-        set => SetProperty(ref _showXauPercent, value);
-    }
 
     // 4. 国内金价 (AU)
+    [ObservableProperty]
     private bool _showDom = false;
-    public bool ShowDom
-    {
-        get => _showDom;
-        set => SetProperty(ref _showDom, value);
-    }
 
+    [ObservableProperty]
     private bool _showDomLabel = true;
-    public bool ShowDomLabel
-    {
-        get => _showDomLabel;
-        set => SetProperty(ref _showDomLabel, value);
-    }
 
+    [ObservableProperty]
     private string _domLabelText = "AU";
-    public string DomLabelText
-    {
-        get => _domLabelText;
-        set => SetProperty(ref _domLabelText, value);
-    }
 
+    [ObservableProperty]
     private string _domLabelColor = "#8E8E93";
-    public string DomLabelColor
-    {
-        get => _domLabelColor;
-        set => SetProperty(ref _domLabelColor, value);
-    }
 
+    [ObservableProperty]
     private bool _showDomPrice = true;
-    public bool ShowDomPrice
-    {
-        get => _showDomPrice;
-        set => SetProperty(ref _showDomPrice, value);
-    }
 
+    [ObservableProperty]
     private int _domPriceDecimals = 2;
-    public int DomPriceDecimals
-    {
-        get => _domPriceDecimals;
-        set => SetProperty(ref _domPriceDecimals, value);
-    }
 
+    [ObservableProperty]
     private string _domPriceColor = "#F2F2F7";
-    public string DomPriceColor
-    {
-        get => _domPriceColor;
-        set => SetProperty(ref _domPriceColor, value);
-    }
 
+    [ObservableProperty]
     private bool _showDomChangeRate = true;
-    public bool ShowDomChangeRate
-    {
-        get => _showDomChangeRate;
-        set => SetProperty(ref _showDomChangeRate, value);
-    }
 
+    [ObservableProperty]
     private bool _showDomSign = true;
-    public bool ShowDomSign
-    {
-        get => _showDomSign;
-        set => SetProperty(ref _showDomSign, value);
-    }
 
+    [ObservableProperty]
     private bool _showDomPercent = true;
-    public bool ShowDomPercent
-    {
-        get => _showDomPercent;
-        set => SetProperty(ref _showDomPercent, value);
-    }
 
     // 5. 黄金延期 Au(T+D)
+    [ObservableProperty]
     private bool _showAutd = false;
-    public bool ShowAutd
-    {
-        get => _showAutd;
-        set => SetProperty(ref _showAutd, value);
-    }
 
+    [ObservableProperty]
     private bool _showAutdLabel = true;
-    public bool ShowAutdLabel
-    {
-        get => _showAutdLabel;
-        set => SetProperty(ref _showAutdLabel, value);
-    }
 
+    [ObservableProperty]
     private string _autdLabelText = "AuTD";
-    public string AutdLabelText
-    {
-        get => _autdLabelText;
-        set => SetProperty(ref _autdLabelText, value);
-    }
 
+    [ObservableProperty]
     private string _autdLabelColor = "#8E8E93";
-    public string AutdLabelColor
-    {
-        get => _autdLabelColor;
-        set => SetProperty(ref _autdLabelColor, value);
-    }
 
+    [ObservableProperty]
     private bool _showAutdPrice = true;
-    public bool ShowAutdPrice
-    {
-        get => _showAutdPrice;
-        set => SetProperty(ref _showAutdPrice, value);
-    }
 
+    [ObservableProperty]
     private int _autdPriceDecimals = 2;
-    public int AutdPriceDecimals
-    {
-        get => _autdPriceDecimals;
-        set => SetProperty(ref _autdPriceDecimals, value);
-    }
 
+    [ObservableProperty]
     private string _autdPriceColor = "#F2F2F7";
-    public string AutdPriceColor
-    {
-        get => _autdPriceColor;
-        set => SetProperty(ref _autdPriceColor, value);
-    }
 
+    [ObservableProperty]
     private bool _showAutdChangeRate = true;
-    public bool ShowAutdChangeRate
-    {
-        get => _showAutdChangeRate;
-        set => SetProperty(ref _showAutdChangeRate, value);
-    }
 
+    [ObservableProperty]
     private bool _showAutdSign = true;
-    public bool ShowAutdSign
-    {
-        get => _showAutdSign;
-        set => SetProperty(ref _showAutdSign, value);
-    }
 
+    [ObservableProperty]
     private bool _showAutdPercent = true;
-    public bool ShowAutdPercent
-    {
-        get => _showAutdPercent;
-        set => SetProperty(ref _showAutdPercent, value);
-    }
 
     // 6. 京东积存金 - 民生金价
+    [ObservableProperty]
     private bool _showMs = false;
-    public bool ShowMs
-    {
-        get => _showMs;
-        set => SetProperty(ref _showMs, value);
-    }
 
+    [ObservableProperty]
     private bool _showMsLabel = true;
-    public bool ShowMsLabel
-    {
-        get => _showMsLabel;
-        set => SetProperty(ref _showMsLabel, value);
-    }
 
+    [ObservableProperty]
     private string _msLabelText = "民生";
-    public string MsLabelText
-    {
-        get => _msLabelText;
-        set => SetProperty(ref _msLabelText, value);
-    }
 
+    [ObservableProperty]
     private string _msLabelColor = "#8E8E93";
-    public string MsLabelColor
-    {
-        get => _msLabelColor;
-        set => SetProperty(ref _msLabelColor, value);
-    }
 
+    [ObservableProperty]
     private bool _showMsPrice = true;
-    public bool ShowMsPrice
-    {
-        get => _showMsPrice;
-        set => SetProperty(ref _showMsPrice, value);
-    }
 
+    [ObservableProperty]
     private int _msPriceDecimals = 2;
-    public int MsPriceDecimals
-    {
-        get => _msPriceDecimals;
-        set => SetProperty(ref _msPriceDecimals, value);
-    }
 
+    [ObservableProperty]
     private string _msPriceColor = "#F2F2F7";
-    public string MsPriceColor
-    {
-        get => _msPriceColor;
-        set => SetProperty(ref _msPriceColor, value);
-    }
 
+    [ObservableProperty]
     private bool _showMsChangeRate = true;
-    public bool ShowMsChangeRate
-    {
-        get => _showMsChangeRate;
-        set => SetProperty(ref _showMsChangeRate, value);
-    }
 
+    [ObservableProperty]
     private bool _showMsSign = true;
-    public bool ShowMsSign
-    {
-        get => _showMsSign;
-        set => SetProperty(ref _showMsSign, value);
-    }
 
+    [ObservableProperty]
     private bool _showMsPercent = true;
-    public bool ShowMsPercent
-    {
-        get => _showMsPercent;
-        set => SetProperty(ref _showMsPercent, value);
-    }
 
     // 7. 京东积存金 - 浙商金价
+    [ObservableProperty]
     private bool _showZs = true;
-    public bool ShowZs
-    {
-        get => _showZs;
-        set => SetProperty(ref _showZs, value);
-    }
 
+    [ObservableProperty]
     private bool _showZsLabel = true;
-    public bool ShowZsLabel
-    {
-        get => _showZsLabel;
-        set => SetProperty(ref _showZsLabel, value);
-    }
 
+    [ObservableProperty]
     private string _zsLabelText = "浙商";
-    public string ZsLabelText
-    {
-        get => _zsLabelText;
-        set => SetProperty(ref _zsLabelText, value);
-    }
 
+    [ObservableProperty]
     private string _zsLabelColor = "#8E8E93";
-    public string ZsLabelColor
-    {
-        get => _zsLabelColor;
-        set => SetProperty(ref _zsLabelColor, value);
-    }
 
+    [ObservableProperty]
     private bool _showZsPrice = true;
-    public bool ShowZsPrice
-    {
-        get => _showZsPrice;
-        set => SetProperty(ref _showZsPrice, value);
-    }
 
+    [ObservableProperty]
     private int _zsPriceDecimals = 2;
-    public int ZsPriceDecimals
-    {
-        get => _zsPriceDecimals;
-        set => SetProperty(ref _zsPriceDecimals, value);
-    }
 
+    [ObservableProperty]
     private string _zsPriceColor = "#F2F2F7";
-    public string ZsPriceColor
-    {
-        get => _zsPriceColor;
-        set => SetProperty(ref _zsPriceColor, value);
-    }
 
+    [ObservableProperty]
     private bool _showZsChangeRate = true;
-    public bool ShowZsChangeRate
-    {
-        get => _showZsChangeRate;
-        set => SetProperty(ref _showZsChangeRate, value);
-    }
 
+    [ObservableProperty]
     private bool _showZsSign = true;
-    public bool ShowZsSign
-    {
-        get => _showZsSign;
-        set => SetProperty(ref _showZsSign, value);
-    }
 
+    [ObservableProperty]
     private bool _showZsPercent = true;
-    public bool ShowZsPercent
-    {
-        get => _showZsPercent;
-        set => SetProperty(ref _showZsPercent, value);
-    }
 
     // 8. 涨跌配色
+    [ObservableProperty]
     private string _upColor = "#C07D00";
-    public string UpColor
-    {
-        get => _upColor;
-        set => SetProperty(ref _upColor, value);
-    }
 
+    [ObservableProperty]
     private string _downColor = "#4EAF50";
-    public string DownColor
-    {
-        get => _downColor;
-        set => SetProperty(ref _downColor, value);
-    }
 
+    [ObservableProperty]
     private string _flatColor = "#8E8E93";
-    public string FlatColor
-    {
-        get => _flatColor;
-        set => SetProperty(ref _flatColor, value);
-    }
 
     /// <summary>
     /// 浅拷贝配置副本
