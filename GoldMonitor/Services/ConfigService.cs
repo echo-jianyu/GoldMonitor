@@ -13,8 +13,20 @@ public class ConfigService
     private const string RunRegistryKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private readonly string _configFilePath;
 
-    public ConfigService()
+    public ConfigService(string? configFilePath = null)
     {
+        if (configFilePath != null)
+        {
+            // 显式指定路径：直接使用并确保目录存在
+            _configFilePath = configFilePath;
+            string? dir = Path.GetDirectoryName(configFilePath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            return;
+        }
+
         string appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppName);
         if (!Directory.Exists(appDataFolder))
         {
@@ -62,6 +74,8 @@ public class ConfigService
         }
 
         var defaultConfig = new AppSettings();
+        // 与"文件存在"路径保持一致：同步一次开机自启真实状态
+        defaultConfig.AutoStart = IsAutoStartEnabled();
         SaveConfig(defaultConfig);
         return defaultConfig;
     }
@@ -184,7 +198,11 @@ public class ConfigService
         }
     }
 
-    private bool IsAutoStartEnabled()
+    /// <summary>
+    /// 读取注册表中的开机自启状态。
+    /// protected virtual：测试子类可覆盖以屏蔽真实注册表访问。
+    /// </summary>
+    protected virtual bool IsAutoStartEnabled()
     {
         try
         {
@@ -197,7 +215,11 @@ public class ConfigService
         }
     }
 
-    private void SetAutoStart(bool enable)
+    /// <summary>
+    /// 写入/删除注册表开机自启项。
+    /// protected virtual：测试子类可覆盖以避免测试污染用户真实的自启项。
+    /// </summary>
+    protected virtual void SetAutoStart(bool enable)
     {
         try
         {

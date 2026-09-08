@@ -27,9 +27,12 @@ public partial class SettingsViewModel : ObservableObject
     public event Action? RequestCloseSuccess;
     public event Action? RequestCloseCancel;
 
-    public SettingsViewModel(AppSettings workingSettings, ConfigService configService, GoldPriceInfo? currentPrice)
+    private readonly IUserDialogService _dialogService;
+
+    public SettingsViewModel(AppSettings workingSettings, GoldPriceInfo? currentPrice, IUserDialogService? dialogService = null)
     {
         _settings = workingSettings;
+        _dialogService = dialogService ?? new MessageBoxDialogService();
 
         // 统一显示规则依赖 Settings 的多个模块属性，任一属性变化时联动刷新界面绑定
         _settings.PropertyChanged += OnSettingsPropertyChanged;
@@ -199,13 +202,7 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     public void ResetToDefaults()
     {
-        var result = MessageBox.Show(
-            "确定要将所有样式和配置恢复为程序初始默认值吗？",
-            "恢复默认",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-
-        if (result == MessageBoxResult.Yes)
+        if (_dialogService.Confirm("确定要将所有样式和配置恢复为程序初始默认值吗？", "恢复默认"))
         {
             // 整体替换为全新默认实例：触发 OnSettingsChanged 重挂事件并刷新 Unified* 联动状态
             Settings = new AppSettings();
@@ -269,11 +266,7 @@ public partial class SettingsViewModel : ObservableObject
 
         if (!hasAnyContent)
         {
-            MessageBox.Show(
-                "请至少保留一项可见的内容（如标签、价格或涨跌幅）！\n不能将所有显示内容全部关闭。",
-                "配置校验提示",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            _dialogService.Alert("请至少保留一项可见的内容（如标签、价格或涨跌幅）！\n不能将所有显示内容全部关闭。", "配置校验提示");
             return;
         }
 

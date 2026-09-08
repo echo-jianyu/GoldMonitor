@@ -57,11 +57,9 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public async Task RefreshDataAsync()
     {
-        // 所有入口（定时器 Tick / 菜单命令）均在 UI 线程调用本方法，
-        // 且检查与置位之间无 await，普通 bool 即可安全防重入，
-        // 避免网络慢时（超时 10s > 刷新间隔）请求堆积重叠
+        // 防重入
         if (_isRefreshing) return;
-        _isRefreshing = true;
+        _isRefreshing = true;  
 
         try
         {
@@ -87,7 +85,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public void OpenSettings()
     {
-        var settingsVm = new SettingsViewModel(Settings.Clone(), _configService, PriceData);
+        var settingsVm = new SettingsViewModel(Settings.Clone(), PriceData);
         var settingsWindow = new SettingsWindow(settingsVm)
         {
             Owner = Application.Current.MainWindow
