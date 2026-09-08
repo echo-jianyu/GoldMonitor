@@ -16,6 +16,9 @@ public partial class MainViewModel : ObservableObject
     private readonly ConfigService _configService;
     private readonly DispatcherTimer _timer;
 
+    // 刷新防重入标志（见 RefreshDataAsync）
+    private bool _isRefreshing;
+
     [ObservableProperty]
     private AppSettings _settings;
 
@@ -54,6 +57,12 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public async Task RefreshDataAsync()
     {
+        // 所有入口（定时器 Tick / 菜单命令）均在 UI 线程调用本方法，
+        // 且检查与置位之间无 await，普通 bool 即可安全防重入，
+        // 避免网络慢时（超时 10s > 刷新间隔）请求堆积重叠
+        if (_isRefreshing) return;
+        _isRefreshing = true;
+
         try
         {
             var data = await _goldService.FetchPricesAsync();
@@ -65,6 +74,10 @@ public partial class MainViewModel : ObservableObject
         catch
         {
             // 网络异常静默跳过，界面保留当前有效数据
+        }
+        finally
+        {
+            _isRefreshing = false;
         }
     }
 
@@ -82,8 +95,8 @@ public partial class MainViewModel : ObservableObject
 
         if (settingsWindow.ShowDialog() == true)
         {
-            // 成功保存：更新配置
-            Settings.CopyFrom(settingsVm.Settings);
+            // 成功保存：直接收养设置窗口编辑的深拷贝副本（对话框的修改即最终配置）
+            Settings = settingsVm.Settings;
             _configService.SaveConfig(Settings);
             UpdateTimerInterval();
         }

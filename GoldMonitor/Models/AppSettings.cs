@@ -1,3 +1,5 @@
+using System;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace GoldMonitor.Models;
@@ -42,162 +44,23 @@ public partial class AppSettings : ObservableObject
     [ObservableProperty]
     private bool _showDividers = true;
 
-    // 3. 国际金价 (XAU)
+    // 3. 行情模块
     [ObservableProperty]
-    private bool _showXau = true;
+    private ModuleSettings _xau = new() { Show = true, LabelText = "XAU" };
 
     [ObservableProperty]
-    private bool _showXauLabel = true;
+    private ModuleSettings _dom = new() { Show = false, LabelText = "AU" };
 
     [ObservableProperty]
-    private string _xauLabelText = "XAU";
+    private ModuleSettings _autd = new() { Show = false, LabelText = "AuTD" };
 
     [ObservableProperty]
-    private string _xauLabelColor = "#8E8E93";
+    private ModuleSettings _ms = new() { Show = false, LabelText = "民生" };
 
     [ObservableProperty]
-    private bool _showXauPrice = true;
+    private ModuleSettings _zs = new() { Show = true, LabelText = "浙商" };
 
-    [ObservableProperty]
-    private int _xauPriceDecimals = 2;
-
-    [ObservableProperty]
-    private string _xauPriceColor = "#F2F2F7";
-
-    [ObservableProperty]
-    private bool _showXauChangeRate = true;
-
-    [ObservableProperty]
-    private bool _showXauSign = true;
-
-    [ObservableProperty]
-    private bool _showXauPercent = true;
-
-    // 4. 国内金价 (AU)
-    [ObservableProperty]
-    private bool _showDom = false;
-
-    [ObservableProperty]
-    private bool _showDomLabel = true;
-
-    [ObservableProperty]
-    private string _domLabelText = "AU";
-
-    [ObservableProperty]
-    private string _domLabelColor = "#8E8E93";
-
-    [ObservableProperty]
-    private bool _showDomPrice = true;
-
-    [ObservableProperty]
-    private int _domPriceDecimals = 2;
-
-    [ObservableProperty]
-    private string _domPriceColor = "#F2F2F7";
-
-    [ObservableProperty]
-    private bool _showDomChangeRate = true;
-
-    [ObservableProperty]
-    private bool _showDomSign = true;
-
-    [ObservableProperty]
-    private bool _showDomPercent = true;
-
-    // 5. 黄金延期 Au(T+D)
-    [ObservableProperty]
-    private bool _showAutd = false;
-
-    [ObservableProperty]
-    private bool _showAutdLabel = true;
-
-    [ObservableProperty]
-    private string _autdLabelText = "AuTD";
-
-    [ObservableProperty]
-    private string _autdLabelColor = "#8E8E93";
-
-    [ObservableProperty]
-    private bool _showAutdPrice = true;
-
-    [ObservableProperty]
-    private int _autdPriceDecimals = 2;
-
-    [ObservableProperty]
-    private string _autdPriceColor = "#F2F2F7";
-
-    [ObservableProperty]
-    private bool _showAutdChangeRate = true;
-
-    [ObservableProperty]
-    private bool _showAutdSign = true;
-
-    [ObservableProperty]
-    private bool _showAutdPercent = true;
-
-    // 6. 京东积存金 - 民生金价
-    [ObservableProperty]
-    private bool _showMs = false;
-
-    [ObservableProperty]
-    private bool _showMsLabel = true;
-
-    [ObservableProperty]
-    private string _msLabelText = "民生";
-
-    [ObservableProperty]
-    private string _msLabelColor = "#8E8E93";
-
-    [ObservableProperty]
-    private bool _showMsPrice = true;
-
-    [ObservableProperty]
-    private int _msPriceDecimals = 2;
-
-    [ObservableProperty]
-    private string _msPriceColor = "#F2F2F7";
-
-    [ObservableProperty]
-    private bool _showMsChangeRate = true;
-
-    [ObservableProperty]
-    private bool _showMsSign = true;
-
-    [ObservableProperty]
-    private bool _showMsPercent = true;
-
-    // 7. 京东积存金 - 浙商金价
-    [ObservableProperty]
-    private bool _showZs = true;
-
-    [ObservableProperty]
-    private bool _showZsLabel = true;
-
-    [ObservableProperty]
-    private string _zsLabelText = "浙商";
-
-    [ObservableProperty]
-    private string _zsLabelColor = "#8E8E93";
-
-    [ObservableProperty]
-    private bool _showZsPrice = true;
-
-    [ObservableProperty]
-    private int _zsPriceDecimals = 2;
-
-    [ObservableProperty]
-    private string _zsPriceColor = "#F2F2F7";
-
-    [ObservableProperty]
-    private bool _showZsChangeRate = true;
-
-    [ObservableProperty]
-    private bool _showZsSign = true;
-
-    [ObservableProperty]
-    private bool _showZsPercent = true;
-
-    // 8. 涨跌配色
+    // 4. 涨跌配色
     [ObservableProperty]
     private string _upColor = "#C07D00";
 
@@ -207,92 +70,103 @@ public partial class AppSettings : ObservableObject
     [ObservableProperty]
     private string _flatColor = "#8E8E93";
 
-    /// <summary>
-    /// 浅拷贝配置副本
-    /// </summary>
-    public AppSettings Clone()
+    public AppSettings()
     {
-        return (AppSettings)this.MemberwiseClone();
+        // 字段初始化器直接赋值字段，不经过 setter 也不会触发 OnXxxChanged，需手动订阅初始模块实例
+        Xau.PropertyChanged += OnModulePropertyChanged;
+        Dom.PropertyChanged += OnModulePropertyChanged;
+        Autd.PropertyChanged += OnModulePropertyChanged;
+        Ms.PropertyChanged += OnModulePropertyChanged;
+        Zs.PropertyChanged += OnModulePropertyChanged;
     }
 
     /// <summary>
-    /// 从另一个配置实例复制所有属性
+    /// 模块属性变化 → 以模块属性名向上转发。
     /// </summary>
-    public void CopyFrom(AppSettings other)
+    /// <param name="sender">来源模块</param>
+    /// <param name="e">变化属性</param>
+    private void OnModulePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (other == null) return;
+        // 同一处理器挂在 5 个模块上，用引用相等判断来源模块
+        if (ReferenceEquals(sender, Xau)) OnPropertyChanged(nameof(Xau));
+        else if (ReferenceEquals(sender, Dom)) OnPropertyChanged(nameof(Dom));
+        else if (ReferenceEquals(sender, Autd)) OnPropertyChanged(nameof(Autd));
+        else if (ReferenceEquals(sender, Ms)) OnPropertyChanged(nameof(Ms));
+        else if (ReferenceEquals(sender, Zs)) OnPropertyChanged(nameof(Zs));
+    }
 
-        AutoStart = other.AutoStart;
-        AutoHideOnFullScreen = other.AutoHideOnFullScreen;
-        RefreshIntervalSeconds = other.RefreshIntervalSeconds;
-        WindowLeft = other.WindowLeft;
-        WindowTop = other.WindowTop;
+    /// <summary>
+    /// 模块对象被整体替换时（JSON 反序列化 / Clone 赋值）重新订阅事件
+    /// </summary>
+    /// <param name="oldValue">旧模块实例（可能为 null）</param>
+    /// <param name="newValue">新模块实例（可能为 null）</param>
+    /// <param name="assign">把归一化后的模块写回对应属性</param>
+    /// <param name="createDefault">该模块的默认实例工厂</param>
+    private void RewireModule(ModuleSettings? oldValue, ModuleSettings? newValue, Action<ModuleSettings> assign, Func<ModuleSettings> createDefault)
+    {
+        if (ReferenceEquals(oldValue, newValue)) return;
 
-        UiScale = other.UiScale;
-        CapsuleBackground = other.CapsuleBackground;
-        CapsuleBorderColor = other.CapsuleBorderColor;
-        IdleOpacity = other.IdleOpacity;
-        HoverOpacity = other.HoverOpacity;
-        FontFamily = other.FontFamily;
-        ShowDividers = other.ShowDividers;
+        if (oldValue != null)
+        {
+            oldValue.PropertyChanged -= OnModulePropertyChanged;
+        }
 
-        ShowXau = other.ShowXau;
-        ShowXauLabel = other.ShowXauLabel;
-        XauLabelText = other.XauLabelText;
-        XauLabelColor = other.XauLabelColor;
-        ShowXauPrice = other.ShowXauPrice;
-        XauPriceDecimals = other.XauPriceDecimals;
-        XauPriceColor = other.XauPriceColor;
-        ShowXauChangeRate = other.ShowXauChangeRate;
-        ShowXauSign = other.ShowXauSign;
-        ShowXauPercent = other.ShowXauPercent;
+        if (newValue == null)
+        {
+            // null 归一化为默认实例：assign 会再次进入对应 hook（oldValue 为 null），完成订阅后返回，递归一次即终止
+            assign(createDefault());
+            return;
+        }
 
-        ShowDom = other.ShowDom;
-        ShowDomLabel = other.ShowDomLabel;
-        DomLabelText = other.DomLabelText;
-        DomLabelColor = other.DomLabelColor;
-        ShowDomPrice = other.ShowDomPrice;
-        DomPriceDecimals = other.DomPriceDecimals;
-        DomPriceColor = other.DomPriceColor;
-        ShowDomChangeRate = other.ShowDomChangeRate;
-        ShowDomSign = other.ShowDomSign;
-        ShowDomPercent = other.ShowDomPercent;
+        newValue.PropertyChanged += OnModulePropertyChanged;
+    }
 
-        ShowAutd = other.ShowAutd;
-        ShowAutdLabel = other.ShowAutdLabel;
-        AutdLabelText = other.AutdLabelText;
-        AutdLabelColor = other.AutdLabelColor;
-        ShowAutdPrice = other.ShowAutdPrice;
-        AutdPriceDecimals = other.AutdPriceDecimals;
-        AutdPriceColor = other.AutdPriceColor;
-        ShowAutdChangeRate = other.ShowAutdChangeRate;
-        ShowAutdSign = other.ShowAutdSign;
-        ShowAutdPercent = other.ShowAutdPercent;
+    partial void OnXauChanged(ModuleSettings? oldValue, ModuleSettings? newValue)
+        => RewireModule(oldValue, newValue, m => Xau = m, () => new ModuleSettings { Show = true, LabelText = "XAU" });
 
-        ShowMs = other.ShowMs;
-        ShowMsLabel = other.ShowMsLabel;
-        MsLabelText = other.MsLabelText;
-        MsLabelColor = other.MsLabelColor;
-        ShowMsPrice = other.ShowMsPrice;
-        MsPriceDecimals = other.MsPriceDecimals;
-        MsPriceColor = other.MsPriceColor;
-        ShowMsChangeRate = other.ShowMsChangeRate;
-        ShowMsSign = other.ShowMsSign;
-        ShowMsPercent = other.ShowMsPercent;
+    partial void OnDomChanged(ModuleSettings? oldValue, ModuleSettings? newValue)
+        => RewireModule(oldValue, newValue, m => Dom = m, () => new ModuleSettings { Show = false, LabelText = "AU" });
 
-        ShowZs = other.ShowZs;
-        ShowZsLabel = other.ShowZsLabel;
-        ZsLabelText = other.ZsLabelText;
-        ZsLabelColor = other.ZsLabelColor;
-        ShowZsPrice = other.ShowZsPrice;
-        ZsPriceDecimals = other.ZsPriceDecimals;
-        ZsPriceColor = other.ZsPriceColor;
-        ShowZsChangeRate = other.ShowZsChangeRate;
-        ShowZsSign = other.ShowZsSign;
-        ShowZsPercent = other.ShowZsPercent;
+    partial void OnAutdChanged(ModuleSettings? oldValue, ModuleSettings? newValue)
+        => RewireModule(oldValue, newValue, m => Autd = m, () => new ModuleSettings { Show = false, LabelText = "AuTD" });
 
-        UpColor = other.UpColor;
-        DownColor = other.DownColor;
-        FlatColor = other.FlatColor;
+    partial void OnMsChanged(ModuleSettings? oldValue, ModuleSettings? newValue)
+        => RewireModule(oldValue, newValue, m => Ms = m, () => new ModuleSettings { Show = false, LabelText = "民生" });
+
+    partial void OnZsChanged(ModuleSettings? oldValue, ModuleSettings? newValue)
+        => RewireModule(oldValue, newValue, m => Zs = m, () => new ModuleSettings { Show = true, LabelText = "浙商" });
+
+    /// <summary>
+    /// 深拷贝配置副本：模块逐个克隆，与源实例完全隔离
+    /// </summary>
+    public AppSettings Clone()
+    {
+        var c = new AppSettings
+        {
+            AutoStart = AutoStart,
+            AutoHideOnFullScreen = AutoHideOnFullScreen,
+            RefreshIntervalSeconds = RefreshIntervalSeconds,
+            WindowLeft = WindowLeft,
+            WindowTop = WindowTop,
+            UiScale = UiScale,
+            CapsuleBackground = CapsuleBackground,
+            CapsuleBorderColor = CapsuleBorderColor,
+            IdleOpacity = IdleOpacity,
+            HoverOpacity = HoverOpacity,
+            FontFamily = FontFamily,
+            ShowDividers = ShowDividers,
+            UpColor = UpColor,
+            DownColor = DownColor,
+            FlatColor = FlatColor
+        };
+
+        // 模块经 setter 赋值触发 OnXxxChanged，新实例自动完成事件订阅
+        c.Xau = Xau.Clone();
+        c.Dom = Dom.Clone();
+        c.Autd = Autd.Clone();
+        c.Ms = Ms.Clone();
+        c.Zs = Zs.Clone();
+
+        return c;
     }
 }

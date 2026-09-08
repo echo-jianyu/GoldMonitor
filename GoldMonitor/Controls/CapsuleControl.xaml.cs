@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 using GoldMonitor.Models;
 
 namespace GoldMonitor.Controls;
@@ -31,9 +32,55 @@ public partial class CapsuleControl : UserControl
         set => SetValue(SettingsProperty, value);
     }
 
+    /// <summary>
+    /// 单个行情模块的 UI 描述：设置/行情数据的取值器 + 对应的命名控件。
+    /// 模块设置用选择器从"当前" Settings 上取值（而不是捕获实例引用），
+    /// 避免 Settings 整体替换后模块描述还指向旧实例。
+    /// </summary>
+    private sealed class ModuleVisual
+    {
+        public ModuleVisual(Func<AppSettings, ModuleSettings?> selectSettings,
+                            StackPanel panel,
+                            TextBlock label, TextBlock price, TextBlock rate,
+                            Func<GoldPriceInfo, double> selectPrice, Func<GoldPriceInfo, double> selectRate)
+        {
+            SelectSettings = selectSettings;
+            Panel = panel;
+            Label = label;
+            Price = price;
+            Rate = rate;
+            SelectPrice = selectPrice;
+            SelectRate = selectRate;
+        }
+
+        public Func<AppSettings, ModuleSettings?> SelectSettings { get; }
+        public StackPanel Panel { get; }
+        public TextBlock Label { get; }
+        public TextBlock Price { get; }
+        public TextBlock Rate { get; }
+        public Func<GoldPriceInfo, double> SelectPrice { get; }
+        public Func<GoldPriceInfo, double> SelectRate { get; }
+    }
+
+    private readonly ModuleVisual[] _modules;
+    private readonly Rectangle[] _dividers;
+
     public CapsuleControl()
     {
         InitializeComponent();
+
+        // 5 个行情模块的 UI 描述（顺序与 XAML 布局一致）
+        _modules = new[]
+        {
+            new ModuleVisual(s => s.Xau,  XauPanel,  TxtXauLabel,  TxtXauPrice,  TxtXauRate,  p => p.XauUsd,        p => p.XauChangeRate),
+            new ModuleVisual(s => s.Dom,  DomPanel,  TxtDomLabel,  TxtDomPrice,  TxtDomRate,  p => p.DomesticAu,     p => p.DomesticChangeRate),
+            new ModuleVisual(s => s.Autd, AutdPanel, TxtAutdLabel, TxtAutdPrice, TxtAutdRate, p => p.AutdGoldPrice,  p => p.AutdChangeRate),
+            new ModuleVisual(s => s.Ms,   MsPanel,   TxtMsLabel,   TxtMsPrice,   TxtMsRate,   p => p.MsGoldPrice,    p => p.MsChangeRate),
+            new ModuleVisual(s => s.Zs,   ZsPanel,   TxtZsLabel,   TxtZsPrice,   TxtZsRate,   p => p.ZsGoldPrice,    p => p.ZsChangeRate),
+        };
+
+        // 4 根模块间分割微线（第 i 根位于模块 i 与 i+1 之间）
+        _dividers = new[] { Divider1, Divider2, Divider3, Divider4 };
     }
 
     /// <summary>
@@ -87,7 +134,7 @@ public partial class CapsuleControl : UserControl
     }
 
     /// <summary>
-    /// 数据刷新脉冲：短暂提亮边框后恢复，给用户"数据已更新"的视觉反馈 
+    /// 数据刷新脉冲：短暂提亮边框后恢复，给用户"数据已更新"的视觉反馈
     /// </summary>
     private void PlayRefreshPulse()
     {
@@ -113,10 +160,10 @@ public partial class CapsuleControl : UserControl
     public void UpdateVisuals()
     {
         var s = Settings;
+        if (s == null) return;
+
         // 无行情数据时以全零对象占位：各模块直接显示 0.00，让用户直观看到数据未获取到
         var p = PriceInfo ?? new GoldPriceInfo();
-
-        if (s == null) return;
 
         // 0. 更新矢量缩放比例 (限制在 0.5 到 3.0 之间)
         double scale = Math.Max(0.5, Math.Min(3.0, s.UiScale));
@@ -135,121 +182,52 @@ public partial class CapsuleControl : UserControl
         OuterBorder.BorderBrush = ParseBrush(s.CapsuleBorderColor, "#25FFFFFF");
         OuterBorder.BorderThickness = new Thickness(1);
 
-        // 3. 国际金价 (XAU) 模块控制
+        // 3. 各行情模块统一更新（数据驱动循环）。
         // 数据获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
-        bool hasXau = s.ShowXau && (s.ShowXauLabel || s.ShowXauPrice || s.ShowXauChangeRate);
-        XauPanel.Visibility = hasXau ? Visibility.Visible : Visibility.Collapsed;
-
-        if (hasXau)
+        bool[] visible = new bool[_modules.Length];
+        for (int i = 0; i < _modules.Length; i++)
         {
-            TxtXauLabel.Visibility = s.ShowXauLabel ? Visibility.Visible : Visibility.Collapsed;
-            TxtXauLabel.Text = s.XauLabelText;
-            TxtXauLabel.Foreground = ParseBrush(s.XauLabelColor, "#8E8E93");
+            var mv = _modules[i];
+            var m = mv.SelectSettings(s);
 
-            int xauDecimals = Math.Max(0, Math.Min(2, s.XauPriceDecimals));
-            TxtXauPrice.Visibility = s.ShowXauPrice ? Visibility.Visible : Visibility.Collapsed;
-            TxtXauPrice.Text = p.XauUsd.ToString($"F{xauDecimals}", CultureInfo.InvariantCulture);
-            TxtXauPrice.Foreground = ParseBrush(s.XauPriceColor, "#F2F2F7");
+            // 模块开启且至少保留一项显示内容时才可见
+            bool hasContent = m != null && m.Show && (m.ShowLabel || m.ShowPrice || m.ShowChangeRate);
+            visible[i] = hasContent;
+            mv.Panel.Visibility = hasContent ? Visibility.Visible : Visibility.Collapsed;
 
-            TxtXauRate.Visibility = s.ShowXauChangeRate ? Visibility.Visible : Visibility.Collapsed;
-            TxtXauRate.Text = FormatRate(p.XauChangeRate, s.ShowXauSign, s.ShowXauPercent);
-            TxtXauRate.Foreground = GetRateBrush(p.XauChangeRate, s);
+            if (m == null) continue;
+
+            mv.Label.Visibility = m.ShowLabel ? Visibility.Visible : Visibility.Collapsed;
+            mv.Label.Text = m.LabelText;
+            mv.Label.Foreground = ParseBrush(m.LabelColor, "#8E8E93");
+
+            int decimals = Math.Max(0, Math.Min(2, m.PriceDecimals));
+            mv.Price.Visibility = m.ShowPrice ? Visibility.Visible : Visibility.Collapsed;
+            mv.Price.Text = mv.SelectPrice(p).ToString($"F{decimals}", CultureInfo.InvariantCulture);
+            mv.Price.Foreground = ParseBrush(m.PriceColor, "#F2F2F7");
+
+            mv.Rate.Visibility = m.ShowChangeRate ? Visibility.Visible : Visibility.Collapsed;
+            mv.Rate.Text = FormatRate(mv.SelectRate(p), m.ShowSign, m.ShowPercent);
+            mv.Rate.Foreground = GetRateBrush(mv.SelectRate(p), s);
         }
 
-        // 4. 国内金价 (AU9999) 模块控制
-        // 数据获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
-        bool hasDom = s.ShowDom && (s.ShowDomLabel || s.ShowDomPrice || s.ShowDomChangeRate);
-        DomPanel.Visibility = hasDom ? Visibility.Visible : Visibility.Collapsed;
-
-        if (hasDom)
+        // 4. 分割线：全局开关开启、左侧模块可见、且右侧仍存在其它可见模块时才显示
+        for (int i = 0; i < _dividers.Length; i++)
         {
-            TxtDomLabel.Visibility = s.ShowDomLabel ? Visibility.Visible : Visibility.Collapsed;
-            TxtDomLabel.Text = s.DomLabelText;
-            TxtDomLabel.Foreground = ParseBrush(s.DomLabelColor, "#8E8E93");
+            bool rightVisible = false;
+            for (int j = i + 1; j < visible.Length; j++)
+            {
+                if (visible[j])
+                {
+                    rightVisible = true;
+                    break;
+                }
+            }
 
-            int domDecimals = Math.Max(0, Math.Min(2, s.DomPriceDecimals));
-            TxtDomPrice.Visibility = s.ShowDomPrice ? Visibility.Visible : Visibility.Collapsed;
-            TxtDomPrice.Text = p.DomesticAu.ToString($"F{domDecimals}", CultureInfo.InvariantCulture);
-            TxtDomPrice.Foreground = ParseBrush(s.DomPriceColor, "#F2F2F7");
-
-            TxtDomRate.Visibility = s.ShowDomChangeRate ? Visibility.Visible : Visibility.Collapsed;
-            TxtDomRate.Text = FormatRate(p.DomesticChangeRate, s.ShowDomSign, s.ShowDomPercent);
-            TxtDomRate.Foreground = GetRateBrush(p.DomesticChangeRate, s);
+            _dividers[i].Visibility = s.ShowDividers && visible[i] && rightVisible
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
-
-        // 5. 黄金延期 Au(T+D) 模块控制
-        // 数据获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
-        bool hasAutd = s.ShowAutd && (s.ShowAutdLabel || s.ShowAutdPrice || s.ShowAutdChangeRate);
-        AutdPanel.Visibility = hasAutd ? Visibility.Visible : Visibility.Collapsed;
-
-        if (hasAutd)
-        {
-            TxtAutdLabel.Visibility = s.ShowAutdLabel ? Visibility.Visible : Visibility.Collapsed;
-            TxtAutdLabel.Text = s.AutdLabelText;
-            TxtAutdLabel.Foreground = ParseBrush(s.AutdLabelColor, "#8E8E93");
-
-            int autdDecimals = Math.Max(0, Math.Min(2, s.AutdPriceDecimals));
-            TxtAutdPrice.Visibility = s.ShowAutdPrice ? Visibility.Visible : Visibility.Collapsed;
-            TxtAutdPrice.Text = p.AutdGoldPrice.ToString($"F{autdDecimals}", CultureInfo.InvariantCulture);
-            TxtAutdPrice.Foreground = ParseBrush(s.AutdPriceColor, "#F2F2F7");
-
-            TxtAutdRate.Visibility = s.ShowAutdChangeRate ? Visibility.Visible : Visibility.Collapsed;
-            TxtAutdRate.Text = FormatRate(p.AutdChangeRate, s.ShowAutdSign, s.ShowAutdPercent);
-            TxtAutdRate.Foreground = GetRateBrush(p.AutdChangeRate, s);
-        }
-
-        // 6. 民生积存金模块控制
-        // 京东数据源获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
-        bool hasMs = s.ShowMs && (s.ShowMsLabel || s.ShowMsPrice || s.ShowMsChangeRate);
-        MsPanel.Visibility = hasMs ? Visibility.Visible : Visibility.Collapsed;
-
-        if (hasMs)
-        {
-            TxtMsLabel.Visibility = s.ShowMsLabel ? Visibility.Visible : Visibility.Collapsed;
-            TxtMsLabel.Text = s.MsLabelText;
-            TxtMsLabel.Foreground = ParseBrush(s.MsLabelColor, "#8E8E93");
-
-            int msDecimals = Math.Max(0, Math.Min(2, s.MsPriceDecimals));
-            TxtMsPrice.Visibility = s.ShowMsPrice ? Visibility.Visible : Visibility.Collapsed;
-            TxtMsPrice.Text = p.MsGoldPrice.ToString($"F{msDecimals}", CultureInfo.InvariantCulture);
-            TxtMsPrice.Foreground = ParseBrush(s.MsPriceColor, "#F2F2F7");
-
-            TxtMsRate.Visibility = s.ShowMsChangeRate ? Visibility.Visible : Visibility.Collapsed;
-            TxtMsRate.Text = FormatRate(p.MsChangeRate, s.ShowMsSign, s.ShowMsPercent);
-            TxtMsRate.Foreground = GetRateBrush(p.MsChangeRate, s);
-        }
-
-        // 7. 浙商积存金模块控制
-        // 京东数据源获取失败时价格显示为 0.00，让用户直观看到行情暂不可用
-        bool hasZs = s.ShowZs && (s.ShowZsLabel || s.ShowZsPrice || s.ShowZsChangeRate);
-        ZsPanel.Visibility = hasZs ? Visibility.Visible : Visibility.Collapsed;
-
-        if (hasZs)
-        {
-            TxtZsLabel.Visibility = s.ShowZsLabel ? Visibility.Visible : Visibility.Collapsed;
-            TxtZsLabel.Text = s.ZsLabelText;
-            TxtZsLabel.Foreground = ParseBrush(s.ZsLabelColor, "#8E8E93");
-
-            int zsDecimals = Math.Max(0, Math.Min(2, s.ZsPriceDecimals));
-            TxtZsPrice.Visibility = s.ShowZsPrice ? Visibility.Visible : Visibility.Collapsed;
-            TxtZsPrice.Text = p.ZsGoldPrice.ToString($"F{zsDecimals}", CultureInfo.InvariantCulture);
-            TxtZsPrice.Foreground = ParseBrush(s.ZsPriceColor, "#F2F2F7");
-
-            TxtZsRate.Visibility = s.ShowZsChangeRate ? Visibility.Visible : Visibility.Collapsed;
-            TxtZsRate.Text = FormatRate(p.ZsChangeRate, s.ShowZsSign, s.ShowZsPercent);
-            TxtZsRate.Foreground = GetRateBrush(p.ZsChangeRate, s);
-        }
-
-        // 9. 分割线：全局开关开启、左侧模块可见、且右侧仍存在其它可见模块时才显示
-        bool showDivider = s.ShowDividers;
-        // Divider1 位于 Xau 与 Dom 之间：当 Dom 隐藏但后续模块可见时，由 Divider1 承担分隔
-        Divider1.Visibility = (showDivider && hasXau && (hasDom || hasAutd || hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
-        // Divider2 位于 Dom 与 Autd 之间
-        Divider2.Visibility = (showDivider && hasDom && (hasAutd || hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
-        // Divider3 位于 Autd 与 Ms 之间
-        Divider3.Visibility = (showDivider && hasAutd && (hasMs || hasZs)) ? Visibility.Visible : Visibility.Collapsed;
-        // Divider4 位于 Ms 与 Zs 之间
-        Divider4.Visibility = (showDivider && hasMs && hasZs) ? Visibility.Visible : Visibility.Collapsed;
     }
 
     /// <summary>
@@ -273,7 +251,7 @@ public partial class CapsuleControl : UserControl
         }
 
         string percent = showPercent ? "%" : "";
-        return $"{sign}{rate:F2}{percent}";
+        return $"{sign}{rate.ToString("F2", CultureInfo.InvariantCulture)}{percent}";
     }
 
     /// <summary>
@@ -290,26 +268,71 @@ public partial class CapsuleControl : UserControl
     }
 
     /// <summary>
-    /// 解析 HEX 字符串为 Brush
+    /// 画刷缓存：按 HEX 字符串缓存冻结后的画刷，避免每次刷新重复解析。
+    /// 仅 UI 线程访问，无需加锁。
+    /// </summary>
+    private static readonly Dictionary<string, Brush> BrushCache = new Dictionary<string, Brush>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// 解析 HEX 字符串为 Brush，解析失败时回退默认色
     /// </summary>
     /// <param name="hex"></param>
     /// <param name="defaultHex"></param>
     /// <returns></returns>
     private static Brush ParseBrush(string? hex, string defaultHex)
     {
+        // net48 的 BCL 未标注 [NotNullWhen]，编译器无法推断此分支 hex 非空，需手动断言
+        string key = string.IsNullOrWhiteSpace(hex) ? defaultHex : hex!.Trim();
+
+        // 命中缓存直接复用冻结画刷
+        if (BrushCache.TryGetValue(key, out Brush? cached) && cached != null)
+        {
+            return cached;
+        }
+
+        // 解析失败时回退默认色（默认值为合法 HEX 常量，必然解析成功）
+        if (!TryCreateBrush(key, out Brush? brush) || brush == null)
+        {
+            brush = ResolveFallback(defaultHex);
+        }
+
+        if (brush.CanFreeze) brush.Freeze();
+        BrushCache[key] = brush;
+        return brush;
+    }
+
+    /// <summary>
+    /// 从缓存或直接解析获取默认色画刷
+    /// </summary>
+    private static Brush ResolveFallback(string defaultHex)
+    {
+        if (BrushCache.TryGetValue(defaultHex, out Brush? fallback) && fallback != null)
+        {
+            return fallback;
+        }
+
+        if (TryCreateBrush(defaultHex, out Brush? created) && created != null)
+        {
+            return created;
+        }
+
+        return Brushes.Transparent;
+    }
+
+    /// <summary>
+    /// 尝试将 HEX 字符串解析为 Brush
+    /// </summary>
+    private static bool TryCreateBrush(string hex, out Brush? brush)
+    {
         try
         {
-            if (!string.IsNullOrWhiteSpace(hex))
-            {
-                var brush = (Brush)new BrushConverter().ConvertFromString(hex)!;
-                if (brush.CanFreeze) brush.Freeze();
-                return brush;
-            }
+            brush = (Brush)new BrushConverter().ConvertFromString(hex);
+            return brush != null;
         }
-        catch { }
-
-        var fallback = (Brush)new BrushConverter().ConvertFromString(defaultHex)!;
-        if (fallback.CanFreeze) fallback.Freeze();
-        return fallback;
+        catch
+        {
+            brush = null;
+            return false;
+        }
     }
 }

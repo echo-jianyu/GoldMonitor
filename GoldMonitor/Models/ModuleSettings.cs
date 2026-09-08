@@ -3,9 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace GoldMonitor.Models;
 
 /// <summary>
-/// 单个行情模块的显示设置。
-/// 五个行情模块（XAU / AU9999 / AuTD / 民生 / 浙商）共用同一份结构，
-/// 模块特有的默认值由 AppSettings 中的字段初始化器区分。
+/// 单个行情模块的显示设置
 /// </summary>
 public partial class ModuleSettings : ObservableObject
 {

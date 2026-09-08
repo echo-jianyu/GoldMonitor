@@ -69,14 +69,14 @@ public partial class SettingsViewModel : ObservableObject
     /// </summary>
     public bool UnifiedShowLabel
     {
-        get => Settings.ShowXauLabel;
+        get => Settings.Xau.ShowLabel;
         set
         {
-            Settings.ShowXauLabel = value;
-            Settings.ShowDomLabel = value;
-            Settings.ShowAutdLabel = value;
-            Settings.ShowMsLabel = value;
-            Settings.ShowZsLabel = value;
+            Settings.Xau.ShowLabel = value;
+            Settings.Dom.ShowLabel = value;
+            Settings.Autd.ShowLabel = value;
+            Settings.Ms.ShowLabel = value;
+            Settings.Zs.ShowLabel = value;
         }
     }
 
@@ -85,14 +85,14 @@ public partial class SettingsViewModel : ObservableObject
     /// </summary>
     public bool UnifiedShowPrice
     {
-        get => Settings.ShowXauPrice;
+        get => Settings.Xau.ShowPrice;
         set
         {
-            Settings.ShowXauPrice = value;
-            Settings.ShowDomPrice = value;
-            Settings.ShowAutdPrice = value;
-            Settings.ShowMsPrice = value;
-            Settings.ShowZsPrice = value;
+            Settings.Xau.ShowPrice = value;
+            Settings.Dom.ShowPrice = value;
+            Settings.Autd.ShowPrice = value;
+            Settings.Ms.ShowPrice = value;
+            Settings.Zs.ShowPrice = value;
         }
     }
 
@@ -101,14 +101,14 @@ public partial class SettingsViewModel : ObservableObject
     /// </summary>
     public bool UnifiedShowRate
     {
-        get => Settings.ShowXauChangeRate;
+        get => Settings.Xau.ShowChangeRate;
         set
         {
-            Settings.ShowXauChangeRate = value;
-            Settings.ShowDomChangeRate = value;
-            Settings.ShowAutdChangeRate = value;
-            Settings.ShowMsChangeRate = value;
-            Settings.ShowZsChangeRate = value;
+            Settings.Xau.ShowChangeRate = value;
+            Settings.Dom.ShowChangeRate = value;
+            Settings.Autd.ShowChangeRate = value;
+            Settings.Ms.ShowChangeRate = value;
+            Settings.Zs.ShowChangeRate = value;
         }
     }
 
@@ -117,14 +117,14 @@ public partial class SettingsViewModel : ObservableObject
     /// </summary>
     public bool UnifiedSign
     {
-        get => Settings.ShowXauSign;
+        get => Settings.Xau.ShowSign;
         set
         {
-            Settings.ShowXauSign = value;
-            Settings.ShowDomSign = value;
-            Settings.ShowAutdSign = value;
-            Settings.ShowMsSign = value;
-            Settings.ShowZsSign = value;
+            Settings.Xau.ShowSign = value;
+            Settings.Dom.ShowSign = value;
+            Settings.Autd.ShowSign = value;
+            Settings.Ms.ShowSign = value;
+            Settings.Zs.ShowSign = value;
         }
     }
 
@@ -133,14 +133,14 @@ public partial class SettingsViewModel : ObservableObject
     /// </summary>
     public bool UnifiedPercent
     {
-        get => Settings.ShowXauPercent;
+        get => Settings.Xau.ShowPercent;
         set
         {
-            Settings.ShowXauPercent = value;
-            Settings.ShowDomPercent = value;
-            Settings.ShowAutdPercent = value;
-            Settings.ShowMsPercent = value;
-            Settings.ShowZsPercent = value;
+            Settings.Xau.ShowPercent = value;
+            Settings.Dom.ShowPercent = value;
+            Settings.Autd.ShowPercent = value;
+            Settings.Ms.ShowPercent = value;
+            Settings.Zs.ShowPercent = value;
         }
     }
 
@@ -149,20 +149,42 @@ public partial class SettingsViewModel : ObservableObject
     /// </summary>
     public int UnifiedDecimals
     {
-        get => Settings.XauPriceDecimals;
+        get => Settings.Xau.PriceDecimals;
         set
         {
-            Settings.XauPriceDecimals = value;
-            Settings.DomPriceDecimals = value;
-            Settings.AutdPriceDecimals = value;
-            Settings.MsPriceDecimals = value;
-            Settings.ZsPriceDecimals = value;
+            Settings.Xau.PriceDecimals = value;
+            Settings.Dom.PriceDecimals = value;
+            Settings.Autd.PriceDecimals = value;
+            Settings.Ms.PriceDecimals = value;
+            Settings.Zs.PriceDecimals = value;
         }
     }
 
     // Settings属性变化：
     private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        OnPropertyChanged(nameof(UnifiedShowLabel));
+        OnPropertyChanged(nameof(UnifiedShowPrice));
+        OnPropertyChanged(nameof(UnifiedShowRate));
+        OnPropertyChanged(nameof(UnifiedSign));
+        OnPropertyChanged(nameof(UnifiedPercent));
+        OnPropertyChanged(nameof(UnifiedDecimals));
+    }
+
+    /// <summary>
+    /// Settings 整体被替换时（恢复默认）重新挂订阅并全量刷新 Unified* 联动状态。
+    /// </summary>
+    partial void OnSettingsChanged(AppSettings? oldValue, AppSettings? newValue)
+    {
+        if (oldValue != null)
+        {
+            oldValue.PropertyChanged -= OnSettingsPropertyChanged;
+        }
+        if (newValue != null)
+        {
+            newValue.PropertyChanged += OnSettingsPropertyChanged;
+        }
+
         OnPropertyChanged(nameof(UnifiedShowLabel));
         OnPropertyChanged(nameof(UnifiedShowPrice));
         OnPropertyChanged(nameof(UnifiedShowRate));
@@ -185,8 +207,8 @@ public partial class SettingsViewModel : ObservableObject
 
         if (result == MessageBoxResult.Yes)
         {
-            var def = new AppSettings();
-            Settings.CopyFrom(def);
+            // 整体替换为全新默认实例：触发 OnSettingsChanged 重挂事件并刷新 Unified* 联动状态
+            Settings = new AppSettings();
         }
     }
 
@@ -233,14 +255,19 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     public void Save()
     {
-        // 1. 模块启用完整性校验
-        bool hasXauContent = Settings.ShowXau && (Settings.ShowXauLabel || Settings.ShowXauPrice || Settings.ShowXauChangeRate);
-        bool hasDomContent = Settings.ShowDom && (Settings.ShowDomLabel || Settings.ShowDomPrice || Settings.ShowDomChangeRate);
-        bool hasAutdContent = Settings.ShowAutd && (Settings.ShowAutdLabel || Settings.ShowAutdPrice || Settings.ShowAutdChangeRate);
-        bool hasMsContent = Settings.ShowMs && (Settings.ShowMsLabel || Settings.ShowMsPrice || Settings.ShowMsChangeRate);
-        bool hasZsContent = Settings.ShowZs && (Settings.ShowZsLabel || Settings.ShowZsPrice || Settings.ShowZsChangeRate);
+        // 1. 模块启用完整性校验：至少保留一项可见内容
+        var modules = new[] { Settings.Xau, Settings.Dom, Settings.Autd, Settings.Ms, Settings.Zs };
+        bool hasAnyContent = false;
+        foreach (var m in modules)
+        {
+            if (m.Show && (m.ShowLabel || m.ShowPrice || m.ShowChangeRate))
+            {
+                hasAnyContent = true;
+                break;
+            }
+        }
 
-        if (!hasXauContent && !hasDomContent && !hasAutdContent && !hasMsContent && !hasZsContent)
+        if (!hasAnyContent)
         {
             MessageBox.Show(
                 "请至少保留一项可见的内容（如标签、价格或涨跌幅）！\n不能将所有显示内容全部关闭。",
@@ -253,13 +280,12 @@ public partial class SettingsViewModel : ObservableObject
         // 2. 参数边界自动修正（安全保护）
         Settings.RefreshIntervalSeconds = Math.Max(1, Math.Min(Settings.RefreshIntervalSeconds, 3600));
         Settings.UiScale = Math.Max(0.5, Math.Min(Settings.UiScale, 3.0));
-        Settings.XauPriceDecimals = Math.Max(0, Math.Min(Settings.XauPriceDecimals, 2));
-        Settings.DomPriceDecimals = Math.Max(0, Math.Min(Settings.DomPriceDecimals, 2));
-        Settings.AutdPriceDecimals = Math.Max(0, Math.Min(Settings.AutdPriceDecimals, 2));
-        Settings.MsPriceDecimals = Math.Max(0, Math.Min(Settings.MsPriceDecimals, 2));
-        Settings.ZsPriceDecimals = Math.Max(0, Math.Min(Settings.ZsPriceDecimals, 2));
         Settings.IdleOpacity = Math.Max(0.05, Math.Min(Settings.IdleOpacity, 1.0));
         Settings.HoverOpacity = Math.Max(0.05, Math.Min(Settings.HoverOpacity, 1.0));
+        foreach (var m in modules)
+        {
+            m.PriceDecimals = Math.Max(0, Math.Min(m.PriceDecimals, 2));
+        }
 
         RequestCloseSuccess?.Invoke();
     }

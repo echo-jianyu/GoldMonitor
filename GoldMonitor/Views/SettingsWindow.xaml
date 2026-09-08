@@ -443,57 +443,57 @@
                                     <TextBlock Grid.Row="0" Grid.Column="4" Text="价格色" Style="{StaticResource ColHeader}" HorizontalAlignment="Center"/>
 
                                     <!-- 国际金价 XAU -->
-                                    <CheckBox Grid.Row="1" Grid.Column="0" IsChecked="{Binding Settings.ShowXau}"/>
+                                    <CheckBox Grid.Row="1" Grid.Column="0" IsChecked="{Binding Settings.Xau.Show}"/>
                                     <TextBlock Grid.Row="1" Grid.Column="1" Text="国际金价 (XAU)" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Settings.XauLabelText, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Settings.Xau.LabelText, UpdateSourceTrigger=PropertyChanged}"/>
                                     <controls:ColorSwatchButton Grid.Row="1" Grid.Column="3" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.XauLabelColor}"/>
+                                                                ColorHex="{Binding Settings.Xau.LabelColor}"/>
                                     <controls:ColorSwatchButton Grid.Row="1" Grid.Column="4" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.XauPriceColor}"/>
+                                                                ColorHex="{Binding Settings.Xau.PriceColor}"/>
 
                                     <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Background="#F2F2F5" Height="1"/>
 
                                     <!-- 国内金价 AU9999 -->
-                                    <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="{Binding Settings.ShowDom}"/>
+                                    <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="{Binding Settings.Dom.Show}"/>
                                     <TextBlock Grid.Row="3" Grid.Column="1" Text="国内金价 (AU9999)" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding Settings.DomLabelText, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding Settings.Dom.LabelText, UpdateSourceTrigger=PropertyChanged}"/>
                                     <controls:ColorSwatchButton Grid.Row="3" Grid.Column="3" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.DomLabelColor}"/>
+                                                                ColorHex="{Binding Settings.Dom.LabelColor}"/>
                                     <controls:ColorSwatchButton Grid.Row="3" Grid.Column="4" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.DomPriceColor}"/>
+                                                                ColorHex="{Binding Settings.Dom.PriceColor}"/>
 
                                     <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5" Background="#F2F2F5" Height="1"/>
 
                                     <!-- 黄金延期 Au(T+D) -->
-                                    <CheckBox Grid.Row="5" Grid.Column="0" IsChecked="{Binding Settings.ShowAutd}"/>
+                                    <CheckBox Grid.Row="5" Grid.Column="0" IsChecked="{Binding Settings.Autd.Show}"/>
                                     <TextBlock Grid.Row="5" Grid.Column="1" Text="黄金延期 (AuTD)" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Row="5" Grid.Column="2" Text="{Binding Settings.AutdLabelText, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBox Grid.Row="5" Grid.Column="2" Text="{Binding Settings.Autd.LabelText, UpdateSourceTrigger=PropertyChanged}"/>
                                     <controls:ColorSwatchButton Grid.Row="5" Grid.Column="3" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.AutdLabelColor}"/>
+                                                                ColorHex="{Binding Settings.Autd.LabelColor}"/>
                                     <controls:ColorSwatchButton Grid.Row="5" Grid.Column="4" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.AutdPriceColor}"/>
+                                                                ColorHex="{Binding Settings.Autd.PriceColor}"/>
 
                                     <Border Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="5" Background="#F2F2F5" Height="1"/>
 
                                     <!-- 民生积存金 -->
-                                    <CheckBox Grid.Row="7" Grid.Column="0" IsChecked="{Binding Settings.ShowMs}"/>
+                                    <CheckBox Grid.Row="7" Grid.Column="0" IsChecked="{Binding Settings.Ms.Show}"/>
                                     <TextBlock Grid.Row="7" Grid.Column="1" Text="民生积存金 (京东金融)" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Row="7" Grid.Column="2" Text="{Binding Settings.MsLabelText, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBox Grid.Row="7" Grid.Column="2" Text="{Binding Settings.Ms.LabelText, UpdateSourceTrigger=PropertyChanged}"/>
                                     <controls:ColorSwatchButton Grid.Row="7" Grid.Column="3" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.MsLabelColor}"/>
+                                                                ColorHex="{Binding Settings.Ms.LabelColor}"/>
                                     <controls:ColorSwatchButton Grid.Row="7" Grid.Column="4" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.MsPriceColor}"/>
+                                                                ColorHex="{Binding Settings.Ms.PriceColor}"/>
 
                                     <Border Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5" Background="#F2F2F5" Height="1"/>
 
                                     <!-- 浙商积存金 -->
-                                    <CheckBox Grid.Row="9" Grid.Column="0" IsChecked="{Binding Settings.ShowZs}"/>
+                                    <CheckBox Grid.Row="9" Grid.Column="0" IsChecked="{Binding Settings.Zs.Show}"/>
                                     <TextBlock Grid.Row="9" Grid.Column="1" Text="浙商积存金 (京东金融)" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Row="9" Grid.Column="2" Text="{Binding Settings.ZsLabelText, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBox Grid.Row="9" Grid.Column="2" Text="{Binding Settings.Zs.LabelText, UpdateSourceTrigger=PropertyChanged}"/>
                                     <controls:ColorSwatchButton Grid.Row="9" Grid.Column="3" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.ZsLabelColor}"/>
+                                                                ColorHex="{Binding Settings.Zs.LabelColor}"/>
                                     <controls:ColorSwatchButton Grid.Row="9" Grid.Column="4" HorizontalAlignment="Center"
-                                                                ColorHex="{Binding Settings.ZsPriceColor}"/>
+                                                                ColorHex="{Binding Settings.Zs.PriceColor}"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
