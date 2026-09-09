@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="GoldMonitor.Tests/GoldMonitor.Tests.csproj" Id="5fa73c11-8a66-4550-9777-f64bb799e1b4" />
   <Project Path="GoldMonitor/GoldMonitor.csproj" />
 </Solution>
