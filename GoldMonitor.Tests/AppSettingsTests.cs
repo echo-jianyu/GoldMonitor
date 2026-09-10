@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using GoldMonitor.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GoldMonitor.Tests;
 

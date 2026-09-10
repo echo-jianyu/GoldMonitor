@@ -42,15 +42,14 @@ public partial class CapsuleControl : UserControl
         public ModuleVisual(Func<AppSettings, ModuleSettings?> selectSettings,
                             StackPanel panel,
                             TextBlock label, TextBlock price, TextBlock rate,
-                            Func<GoldPriceInfo, double> selectPrice, Func<GoldPriceInfo, double> selectRate)
+                            Func<GoldPriceInfo, GoldQuote> selectData)
         {
             SelectSettings = selectSettings;
             Panel = panel;
             Label = label;
             Price = price;
             Rate = rate;
-            SelectPrice = selectPrice;
-            SelectRate = selectRate;
+            SelectData = selectData;
         }
 
         public Func<AppSettings, ModuleSettings?> SelectSettings { get; }
@@ -58,8 +57,7 @@ public partial class CapsuleControl : UserControl
         public TextBlock Label { get; }
         public TextBlock Price { get; }
         public TextBlock Rate { get; }
-        public Func<GoldPriceInfo, double> SelectPrice { get; }
-        public Func<GoldPriceInfo, double> SelectRate { get; }
+        public Func<GoldPriceInfo, GoldQuote> SelectData { get; }
     }
 
     private readonly ModuleVisual[] _modules;
@@ -72,11 +70,11 @@ public partial class CapsuleControl : UserControl
         // 5 个行情模块的 UI 描述（顺序与 XAML 布局一致）
         _modules = new[]
         {
-            new ModuleVisual(s => s.Xau,  XauPanel,  TxtXauLabel,  TxtXauPrice,  TxtXauRate,  p => p.XauUsd,        p => p.XauChangeRate),
-            new ModuleVisual(s => s.Dom,  DomPanel,  TxtDomLabel,  TxtDomPrice,  TxtDomRate,  p => p.DomesticAu,     p => p.DomesticChangeRate),
-            new ModuleVisual(s => s.Autd, AutdPanel, TxtAutdLabel, TxtAutdPrice, TxtAutdRate, p => p.AutdGoldPrice,  p => p.AutdChangeRate),
-            new ModuleVisual(s => s.Ms,   MsPanel,   TxtMsLabel,   TxtMsPrice,   TxtMsRate,   p => p.MsGoldPrice,    p => p.MsChangeRate),
-            new ModuleVisual(s => s.Zs,   ZsPanel,   TxtZsLabel,   TxtZsPrice,   TxtZsRate,   p => p.ZsGoldPrice,    p => p.ZsChangeRate),
+            new ModuleVisual(s => s.Xau,  XauPanel,  TxtXauLabel,  TxtXauPrice,  TxtXauRate,  p => p.Xau),
+            new ModuleVisual(s => s.Dom,  DomPanel,  TxtDomLabel,  TxtDomPrice,  TxtDomRate,  p => p.Dom),
+            new ModuleVisual(s => s.Autd, AutdPanel, TxtAutdLabel, TxtAutdPrice, TxtAutdRate, p => p.Autd),
+            new ModuleVisual(s => s.Ms,   MsPanel,   TxtMsLabel,   TxtMsPrice,   TxtMsRate,   p => p.Ms),
+            new ModuleVisual(s => s.Zs,   ZsPanel,   TxtZsLabel,   TxtZsPrice,   TxtZsRate,   p => p.Zs),
         };
 
         // 4 根模块间分割微线（第 i 根位于模块 i 与 i+1 之间）
@@ -126,7 +124,7 @@ public partial class CapsuleControl : UserControl
             control.UpdateVisuals();
 
             // 数据变化时触发脉冲动画
-            if (e.Property == PriceInfoProperty && e.NewValue is GoldPriceInfo info && info.UpdateTime > DateTime.MinValue)
+            if (e.Property == PriceInfoProperty && e.NewValue is GoldPriceInfo info && info.LatestUpdateTime > DateTime.MinValue)
             {
                 control.PlayRefreshPulse();
             }
@@ -197,18 +195,20 @@ public partial class CapsuleControl : UserControl
 
             if (m == null) continue;
 
+            var md = mv.SelectData(p);  // 该模块的行情数据
+
             mv.Label.Visibility = m.ShowLabel ? Visibility.Visible : Visibility.Collapsed;
             mv.Label.Text = m.LabelText;
             mv.Label.Foreground = ParseBrush(m.LabelColor, "#8E8E93");
 
             int decimals = Math.Max(0, Math.Min(2, m.PriceDecimals));
             mv.Price.Visibility = m.ShowPrice ? Visibility.Visible : Visibility.Collapsed;
-            mv.Price.Text = mv.SelectPrice(p).ToString($"F{decimals}", CultureInfo.InvariantCulture);
+            mv.Price.Text = md.Price.ToString($"F{decimals}", CultureInfo.InvariantCulture);
             mv.Price.Foreground = ParseBrush(m.PriceColor, "#F2F2F7");
 
             mv.Rate.Visibility = m.ShowChangeRate ? Visibility.Visible : Visibility.Collapsed;
-            mv.Rate.Text = FormatRate(mv.SelectRate(p), m.ShowSign, m.ShowPercent);
-            mv.Rate.Foreground = GetRateBrush(mv.SelectRate(p), s);
+            mv.Rate.Text = FormatRate(md.ChangeRate, m.ShowSign, m.ShowPercent);
+            mv.Rate.Foreground = GetRateBrush(md.ChangeRate, s);
         }
 
         // 4. 分割线：全局开关开启、左侧模块可见、且右侧仍存在其它可见模块时才显示

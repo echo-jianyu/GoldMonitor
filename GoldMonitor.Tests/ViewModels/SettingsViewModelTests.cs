@@ -198,14 +198,14 @@ public class SettingsViewModelTests
         var vm = new SettingsViewModel(new AppSettings(), null, _dialog);
 
         // Assert：使用拟真预览数据
-        Assert.AreEqual(2938.69, vm.PreviewPrice.XauUsd, 1e-9);
+        Assert.AreEqual(2938.69, vm.PreviewPrice.Xau.Price, 1e-9);
     }
 
     [TestMethod]
     public void Ctor_ValidPrice_ReusesSameInstance()
     {
         // Arrange：currentPrice 有有效数据
-        var price = new GoldPriceInfo { XauUsd = 4700.0 };
+        var price = new GoldPriceInfo { Xau = { Price = 4700.0 } };
 
         // Act
         var vm = new SettingsViewModel(new AppSettings(), price, _dialog);

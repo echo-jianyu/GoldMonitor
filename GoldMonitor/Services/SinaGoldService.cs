@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GoldMonitor.Services;
 
-public class SinaGoldService : IGoldService
+public class SinaGoldService
 {
     private readonly HttpClient _httpClient;
     private const string ApiUrl = "https://hq.sinajs.cn/list=hf_XAU,gds_AU9999,gds_AUTD";
@@ -17,7 +17,7 @@ public class SinaGoldService : IGoldService
         _httpClient = httpClient;
     }
 
-    public async Task<GoldPriceInfo> FetchPricesAsync(CancellationToken ct = default)
+    public async Task<SinaQuote> FetchPricesAsync(CancellationToken ct = default)
     {
         string requestUrl = ApiUrl;
 
@@ -26,9 +26,12 @@ public class SinaGoldService : IGoldService
         byte[] bytes = await responseMessage.Content.ReadAsByteArrayAsync();
         string response = Encoding.GetEncoding("GBK").GetString(bytes);
 
-        // 文本解析交给纯函数解析器，时间戳由服务负责
-        var info = SinaResponseParser.Parse(response);
-        info.UpdateTime = DateTime.Now;
-        return info;
+        // 文本解析交给纯函数解析器，时间戳由服务负责（三个模块共用同一时间）
+        var quote = SinaResponseParser.Parse(response);
+        var now = DateTime.Now;
+        quote.Xau.UpdateTime = now;
+        quote.Dom.UpdateTime = now;
+        quote.Autd.UpdateTime = now;
+        return quote;
     }
 }

@@ -41,22 +41,9 @@ public partial class SettingsViewModel : ObservableObject
         AppVersion = ver != null ? $"v{ver.Major}.{ver.Minor}.{ver.Build}" : "v1.0.0";
 
         // 如果主程序已有实时金价，用实时金价预览；否则提供拟真预览数据
-        _previewPrice = (currentPrice != null && (currentPrice.XauUsd > 0 || currentPrice.MsGoldPrice > 0 || currentPrice.ZsGoldPrice > 0))
+        _previewPrice = (currentPrice != null && (currentPrice.Xau.Price > 0 || currentPrice.Ms.Price > 0 || currentPrice.Zs.Price > 0))
             ? currentPrice
-            : new GoldPriceInfo
-            {
-                XauUsd = 2938.69,
-                XauChangeRate = 0.68,
-                DomesticAu = 688.55,
-                DomesticChangeRate = -0.22,
-                AutdGoldPrice = 688.30,
-                AutdChangeRate = -0.18,
-                MsGoldPrice = 990.46,
-                MsChangeRate = -0.48,
-                ZsGoldPrice = 990.79,
-                ZsChangeRate = -0.47,
-                UpdateTime = DateTime.Now
-            };
+            : BuildSimulatedPreview();
 
         // 获取系统已安装字体（过滤空项并去重）
         SystemFonts = Fonts.SystemFontFamilies
@@ -65,6 +52,22 @@ public partial class SettingsViewModel : ObservableObject
             .Distinct()
             .OrderBy(f => f)
             .ToList();
+    }
+
+    /// <summary>
+    /// 构建拟真预览数据
+    /// </summary>
+    private static GoldPriceInfo BuildSimulatedPreview()
+    {
+        var now = DateTime.Now;
+        return new GoldPriceInfo
+        {
+            Xau = { Price = 2938.69, ChangeRate = 0.68, UpdateTime = now },
+            Dom = { Price = 688.55, ChangeRate = -0.22, UpdateTime = now },
+            Autd = { Price = 688.30, ChangeRate = -0.18, UpdateTime = now },
+            Ms = { Price = 990.46, ChangeRate = -0.48, UpdateTime = now },
+            Zs = { Price = 990.79, ChangeRate = -0.47, UpdateTime = now }
+        };
     }
 
     /// <summary>

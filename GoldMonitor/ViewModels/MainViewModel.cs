@@ -12,7 +12,7 @@ namespace GoldMonitor.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    private readonly IGoldService _goldService;
+    private readonly CompositeGoldService _goldService;
     private readonly ConfigService _configService;
     private readonly DispatcherTimer _timer;
 
@@ -25,7 +25,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private GoldPriceInfo? _priceData;
 
-    public MainViewModel(IGoldService goldService, ConfigService configService)
+    public MainViewModel(CompositeGoldService goldService, ConfigService configService)
     {
         _goldService = goldService;
         _configService = configService;

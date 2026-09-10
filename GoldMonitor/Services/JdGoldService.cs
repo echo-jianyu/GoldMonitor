@@ -9,7 +9,7 @@ namespace GoldMonitor.Services;
 /// <summary>
 /// 京东金融积存金行情服务（goldType=1 民生金价 / goldType=2 浙商金价）
 /// </summary>
-public class JdGoldService : IGoldService
+public class JdGoldService
 {
     private readonly HttpClient _httpClient;
     private const string ApiUrl = "https://ms.jr.jd.com/gw2/generic/CreatorSer/pc/m/pcQueryGoldProduct";
@@ -19,7 +19,7 @@ public class JdGoldService : IGoldService
         _httpClient = httpClient;
     }
 
-    public async Task<GoldPriceInfo> FetchPricesAsync(CancellationToken ct = default)
+    public async Task<JdQuote> FetchPricesAsync(CancellationToken ct = default)
     {
         // 民生与浙商两个产品接口并发请求
         var msTask = FetchProductAsync(1, ct);
@@ -36,13 +36,11 @@ public class JdGoldService : IGoldService
             throw new HttpRequestException("京东积存金行情数据不可用");
         }
 
-        return new GoldPriceInfo
+        var now = DateTime.Now;
+        return new JdQuote
         {
-            MsGoldPrice = msPrice,
-            MsChangeRate = msRate,
-            ZsGoldPrice = zsPrice,
-            ZsChangeRate = zsRate,
-            UpdateTime = DateTime.Now
+            Ms = { Price = msPrice, ChangeRate = msRate, UpdateTime = now },
+            Zs = { Price = zsPrice, ChangeRate = zsRate, UpdateTime = now }
         };
     }
 

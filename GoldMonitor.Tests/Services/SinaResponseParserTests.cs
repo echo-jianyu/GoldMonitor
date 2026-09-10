@@ -17,20 +17,17 @@ public class SinaResponseParserTests
     public void Parse_ThreeStatements_ParsesAllMarketsAndRates()
     {
         // Act
-        var info = SinaResponseParser.Parse(SinaFixture);
+        var quote = SinaResponseParser.Parse(SinaFixture);
 
         // Assert：parts[0] 为最新价，parts[7] 为昨收/昨结，涨跌幅 = (最新-昨收)/昨收*100
-        Assert.AreEqual(4637.73, info.XauUsd, 1e-9);
-        Assert.AreEqual(4658.65, info.XauLastClose, 1e-9);
-        Assert.AreEqual(-0.4490571, info.XauChangeRate, 1e-4);
+        Assert.AreEqual(4637.73, quote.Xau.Price, 1e-9);
+        Assert.AreEqual(-0.4490571, quote.Xau.ChangeRate, 1e-4);
 
-        Assert.AreEqual(690.20, info.DomesticAu, 1e-9);
-        Assert.AreEqual(700.00, info.DomLastClose, 1e-9);
-        Assert.AreEqual(-1.4, info.DomesticChangeRate, 1e-9);
+        Assert.AreEqual(690.20, quote.Dom.Price, 1e-9);
+        Assert.AreEqual(-1.4, quote.Dom.ChangeRate, 1e-9);
 
-        Assert.AreEqual(680.40, info.AutdGoldPrice, 1e-9);
-        Assert.AreEqual(680.40, info.AutdLastClose, 1e-9);
-        Assert.AreEqual(0.0, info.AutdChangeRate, 1e-9);  // 平盘
+        Assert.AreEqual(680.40, quote.Autd.Price, 1e-9);
+        Assert.AreEqual(0.0, quote.Autd.ChangeRate, 1e-9);  // 平盘
     }
 
     [TestMethod]
@@ -40,12 +37,12 @@ public class SinaResponseParserTests
         string input = "var hq_str_hf_XAU = \"4637.73,4658.650,4637.73,4638.08,4673.66,4636.11,08:47:00,4658.65,4657.23,0,0,0,2026-08-26,伦敦金（现货黄金）\";";
 
         // Act
-        var info = SinaResponseParser.Parse(input);
+        var quote = SinaResponseParser.Parse(input);
 
         // Assert
-        Assert.AreEqual(4637.73, info.XauUsd, 1e-9);
-        Assert.AreEqual(0.0, info.DomesticAu, 1e-9);
-        Assert.AreEqual(0.0, info.AutdGoldPrice, 1e-9);
+        Assert.AreEqual(4637.73, quote.Xau.Price, 1e-9);
+        Assert.AreEqual(0.0, quote.Dom.Price, 1e-9);
+        Assert.AreEqual(0.0, quote.Autd.Price, 1e-9);
     }
 
     [TestMethod]
@@ -55,11 +52,11 @@ public class SinaResponseParserTests
         string input = "var hq_str_hf_XAU = 123;";
 
         // Act
-        var info = SinaResponseParser.Parse(input);
+        var quote = SinaResponseParser.Parse(input);
 
         // Assert
-        Assert.AreEqual(0.0, info.XauUsd, 1e-9);
-        Assert.AreEqual(0.0, info.XauChangeRate, 1e-9);
+        Assert.AreEqual(0.0, quote.Xau.Price, 1e-9);
+        Assert.AreEqual(0.0, quote.Xau.ChangeRate, 1e-9);
     }
 
     [TestMethod]
@@ -69,10 +66,10 @@ public class SinaResponseParserTests
         string input = "var hq_str_hf_XAU = \"1,2,3\";";
 
         // Act
-        var info = SinaResponseParser.Parse(input);
+        var quote = SinaResponseParser.Parse(input);
 
         // Assert
-        Assert.AreEqual(0.0, info.XauUsd, 1e-9);
+        Assert.AreEqual(0.0, quote.Xau.Price, 1e-9);
     }
 
     [TestMethod]
@@ -82,12 +79,11 @@ public class SinaResponseParserTests
         string input = "var hq_str_hf_XAU = \"abc,1,2,3,4,5,6,4658.65\";";
 
         // Act
-        var info = SinaResponseParser.Parse(input);
+        var quote = SinaResponseParser.Parse(input);
 
         // Assert
-        Assert.AreEqual(0.0, info.XauUsd, 1e-9);
-        Assert.AreEqual(0.0, info.XauLastClose, 1e-9);
-        Assert.AreEqual(0.0, info.XauChangeRate, 1e-9);
+        Assert.AreEqual(0.0, quote.Xau.Price, 1e-9);
+        Assert.AreEqual(0.0, quote.Xau.ChangeRate, 1e-9);
     }
 
     [TestMethod]
@@ -97,12 +93,11 @@ public class SinaResponseParserTests
         string input = "var hq_str_hf_XAU = \"4637.73,1,2,3,4,5,6,0\";";
 
         // Act
-        var info = SinaResponseParser.Parse(input);
+        var quote = SinaResponseParser.Parse(input);
 
         // Assert
-        Assert.AreEqual(4637.73, info.XauUsd, 1e-9);
-        Assert.AreEqual(0.0, info.XauLastClose, 1e-9);
-        Assert.AreEqual(0.0, info.XauChangeRate, 1e-9);
+        Assert.AreEqual(4637.73, quote.Xau.Price, 1e-9);
+        Assert.AreEqual(0.0, quote.Xau.ChangeRate, 1e-9);
     }
 
     [TestMethod]
@@ -113,8 +108,8 @@ public class SinaResponseParserTests
         var whitespace = SinaResponseParser.Parse("   ");
 
         // Assert
-        Assert.AreEqual(0.0, empty.XauUsd, 1e-9);
-        Assert.AreEqual(0.0, empty.DomesticAu, 1e-9);
-        Assert.AreEqual(0.0, whitespace.AutdGoldPrice, 1e-9);
+        Assert.AreEqual(0.0, empty.Xau.Price, 1e-9);
+        Assert.AreEqual(0.0, empty.Dom.Price, 1e-9);
+        Assert.AreEqual(0.0, whitespace.Autd.Price, 1e-9);
     }
 }

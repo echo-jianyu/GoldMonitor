@@ -1,26 +1,31 @@
-﻿using System;
+using System;
+using System.Linq;
 
 namespace GoldMonitor.Models;
 
+/// <summary>
+/// 行情数据聚合：5 个行情模块各自的现价、涨跌幅与更新时间
+/// </summary>
 public class GoldPriceInfo
 {
-    public double XauUsd { get; set; }              // 伦敦金 (美元/盎司)
-    public double XauLastClose { get; set; }         // 昨收
-    public double XauChangeRate { get; set; }        // 涨跌幅 (%)
+    /// <summary>国际金价 (XAU)</summary>
+    public GoldQuote Xau { get; } = new();
 
-    public double DomesticAu { get; set; }          // 国内现货 Au99.99 (元/克)
-    public double DomLastClose { get; set; }         // 昨收
-    public double DomesticChangeRate { get; set; }   // 涨跌幅 (%)
+    /// <summary>国内金价 (AU9999)</summary>
+    public GoldQuote Dom { get; } = new();
 
-    public double AutdGoldPrice { get; set; }        // 上海金交所 Au(T+D) 黄金延期 (元/克)
-    public double AutdLastClose { get; set; }        // 昨结算
-    public double AutdChangeRate { get; set; }       // 涨跌幅 (%)
+    /// <summary>黄金延期 Au(T+D)</summary>
+    public GoldQuote Autd { get; } = new();
 
-    public double MsGoldPrice { get; set; }          // 京东金融-民生积存金 (元/克)
-    public double MsChangeRate { get; set; }         // 涨跌幅 (%)
+    /// <summary>京东积存金 - 民生金价</summary>
+    public GoldQuote Ms { get; } = new();
 
-    public double ZsGoldPrice { get; set; }          // 京东金融-浙商积存金 (元/克)
-    public double ZsChangeRate { get; set; }         // 涨跌幅 (%)
+    /// <summary>京东积存金 - 浙商金价</summary>
+    public GoldQuote Zs { get; } = new();
 
-    public DateTime UpdateTime { get; set; } = DateTime.Now;
+    /// <summary>
+    /// 最近更新时间：各模块时间戳的最大值（脉冲动画的守卫依据）
+    /// </summary>
+    public DateTime LatestUpdateTime =>
+        new[] { Xau.UpdateTime, Dom.UpdateTime, Autd.UpdateTime, Ms.UpdateTime, Zs.UpdateTime }.Max();
 }

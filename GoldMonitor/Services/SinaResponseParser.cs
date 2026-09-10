@@ -5,16 +5,17 @@ using GoldMonitor.Models;
 namespace GoldMonitor.Services;
 
 /// <summary>
-/// 新浪行情纯文本解析器：输入为 GBK 解码后的完整响应文本，输出 GoldPriceInfo。
+/// 新浪行情纯文本解析器：输入为 GBK 解码后的完整响应文本，输出 SinaQuote。
+/// 纯函数：不做网络 IO、不设置时间戳（由服务负责），便于单元测试直接喂字符串。
 /// </summary>
 public static class SinaResponseParser
 {
-    public static GoldPriceInfo Parse(string decodedText)
+    public static SinaQuote Parse(string decodedText)
     {
-        var info = new GoldPriceInfo();
+        var quote = new SinaQuote();
         if (string.IsNullOrEmpty(decodedText))
         {
-            return info;
+            return quote;
         }
 
         // 按分号和换行符切分成单独的语句
@@ -39,12 +40,11 @@ public static class SinaResponseParser
                 // parts[0] 为 XAU 最新价
                 if (double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out double p))
                 {
-                    info.XauUsd = p;
-                    // parts[7] 是昨收价
+                    quote.Xau.Price = p;
+                    // parts[7] 是昨收价（仅用于计算涨跌幅，不落存储）
                     if (double.TryParse(parts[7], NumberStyles.Float, CultureInfo.InvariantCulture, out double lastClose) && lastClose > 0)
                     {
-                        info.XauLastClose = lastClose;
-                        info.XauChangeRate = (p - lastClose) / lastClose * 100;
+                        quote.Xau.ChangeRate = (p - lastClose) / lastClose * 100;
                     }
                 }
             }
@@ -54,12 +54,11 @@ public static class SinaResponseParser
                 // parts[0] 为 Au99.99 最新价
                 if (double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out double p))
                 {
-                    info.DomesticAu = p;
-                    // parts[7] 是昨收价
+                    quote.Dom.Price = p;
+                    // parts[7] 是昨收价（仅用于计算涨跌幅，不落存储）
                     if (double.TryParse(parts[7], NumberStyles.Float, CultureInfo.InvariantCulture, out double lastClose) && lastClose > 0)
                     {
-                        info.DomLastClose = lastClose;
-                        info.DomesticChangeRate = (p - lastClose) / lastClose * 100;
+                        quote.Dom.ChangeRate = (p - lastClose) / lastClose * 100;
                     }
                 }
             }
@@ -69,17 +68,16 @@ public static class SinaResponseParser
             {
                 if (double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out double p))
                 {
-                    info.AutdGoldPrice = p;
-                    // parts[7] 是昨结算价
+                    quote.Autd.Price = p;
+                    // parts[7] 是昨结算价（仅用于计算涨跌幅，不落存储）
                     if (double.TryParse(parts[7], NumberStyles.Float, CultureInfo.InvariantCulture, out double lastClose) && lastClose > 0)
                     {
-                        info.AutdLastClose = lastClose;
-                        info.AutdChangeRate = (p - lastClose) / lastClose * 100;
+                        quote.Autd.ChangeRate = (p - lastClose) / lastClose * 100;
                     }
                 }
             }
         }
 
-        return info;
+        return quote;
     }
 }
